@@ -13,6 +13,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 
+from numpy import ndarray
 from stim import Circuit
 
 __all__ = ["QEC"]
@@ -23,7 +24,7 @@ class QEC():
     An abstract base class for quantum error correction codes.
     """
     
-    __slots__ = ("_distance")
+    __slots__ = ("_distance", "_memory_circuit", "_parity_data")
     
     def __init__(
         self,
@@ -31,7 +32,9 @@ class QEC():
     ) -> None:
         
         self._distance = distance
-        
+        self._memory_circuit: Circuit
+        self._parity_data: list[ndarray] = []
+         
     @property
     def distance(self) -> int:
         r"""
@@ -39,8 +42,28 @@ class QEC():
         """
         return self._distance
     
+    @property
+    def memory_circuit(self) -> Circuit:
+        r"""
+        The circuit for the memory.
+        """
+        return self._memory_circuit
+    
+    @property
+    def parity_data(self) -> ndarray:
+        r"""
+        The parity data for the last experiment.
+        """
+        return self._memory_circuit
+    
     @abstractmethod
-    def build_memory_circuit(self, time: int) -> Circuit:
+    def build_memory_circuit(self, time: int) -> None:
         r"""
         Build and return a Stim Circuit object implementing a memory for the given time.
+        """
+
+    @abstractmethod
+    def collect_parity_data(self, num_samples: int) -> None:
+        r"""
+        Run Stim sampling experiment and get measurement data.
         """

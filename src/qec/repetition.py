@@ -43,4 +43,4 @@ class RepQEC(QEC):
         # Repeted 
         
         
-        # Final round
+        # Final step
