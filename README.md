@@ -1,6 +1,6 @@
 # QEC with Code
 
-This repository provides a library of **Quantum Error Correction (QEC)** code implementations using **Stim**. The goal is to demonstrate how QEC works with different error thresholds and provide practical examples of implementing error correction codes on quantum circuits.
+This repository provides a collection of **Quantum Error Correction (QEC)** code implementations using **Stim**. The goal is to demonstrate how QEC works with different error thresholds and provide practical examples of implementing error correction codes on quantum circuits.
 
 ### Overview
 
