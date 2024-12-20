@@ -69,8 +69,8 @@ class RepetitionCode(BaseCode):
                 for ___ in range(2):
                     
                     # Adding a single qubit depolarization for the lower border data qubit as it only occurs in one CNOT
-                    if data_qubit_count == self.distance:
-                        self._memory_circuit.append("DEPOLARIZE1", [self.distance], self.depolarize1_rate)
+                    if data_qubit_count == self.distance-1:
+                        self._memory_circuit.append("DEPOLARIZE1", [self.distance-1], self.depolarize1_rate)
                         
                     self._memory_circuit.append("CNOT", [data_qubit_count, q])
                     self._memory_circuit.append("DEPOLARIZE2", [data_qubit_count, q], self.depolarize2_rate)
@@ -80,21 +80,22 @@ class RepetitionCode(BaseCode):
                         self._memory_circuit.append("DEPOLARIZE1", [0], self.depolarize1_rate)
                         
                     data_qubit_count +=1
+                data_qubit_count -=1
                     
-            # Adding measurement with pre-measurement error
-            self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
-            self._memory_circuit.append("M", [q])
+                # Adding measurement with pre-measurement error
+                self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
+                self._memory_circuit.append("M", [q])
             
-            # Adding detector
-            if round == 0:
-                self._memory_circuit.append("DETECTOR", [target_rec(-1)])
-            elif round > 0 and round < time:
-                self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-1 - self.number_of_qubits + self.distance)])
+                # Adding detector
+                if round == 0:
+                    self._memory_circuit.append("DETECTOR", [target_rec(-1)])
+                elif round > 0 and round < time:
+                    self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-1 - self.number_of_qubits + self.distance)])
                 
         # End of the final round
         for q in range(self.distance):
             self._memory_circuit.append("M", [q])
             
             # Adding detector
-            if q % 2 == 0:
+            if q > 0 :
                 self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-2), target_rec(-2 - self.number_of_qubits + self.distance)])

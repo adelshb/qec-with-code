@@ -2,6 +2,7 @@
 branch = True
 omit =
     tests/*
+    notebooks/*
     **/__init__.py
 
 [coverage:report]

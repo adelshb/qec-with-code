@@ -1,5 +1,0 @@
-scipy
-jupyter
-stim
-pymatching
-pytest
