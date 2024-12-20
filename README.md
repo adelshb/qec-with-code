@@ -26,17 +26,16 @@ pip install -e ".[dev,docs]"
 
 TBA
 
-## Testing
+## Running tests with pytest
 
-This project uses [pytest](https://docs.pytest.org/en/stable/) for unit tests.
-Tests can be run by running
+To run tests without collecting test coverage data, you can simply use the following command:
 
 ```console
 pytest
 ```
 
 in the root directory of this repostory.
-A coverage report produced using the following arguments:
+If you want a more detailed coverage report in the terminal,  you can simply use the following command:
 
 ```console
 pytest tests --cov --cov-report term-missing
