@@ -32,5 +32,5 @@ class TestQEC:
         assert self.code.depolarize2_rate == 0
         
     def test_build_memory_circuit(self):
-        self.code.build_memory_circuit(time=2)
+        self.code.build_memory_circuit(number_of_rounds=2)
         assert type(self.code.memory_circuit) == Circuit

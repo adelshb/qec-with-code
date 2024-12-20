@@ -45,7 +45,7 @@ class RepetitionCode(BaseCode):
         """
         return self._number_of_qubits
     
-    def build_memory_circuit(self, time: int = 2) -> Circuit:
+    def build_memory_circuit(self, number_of_rounds: int = 2) -> Circuit:
         
         # Initialize the circuit
         self._memory_circuit = Circuit()
@@ -55,7 +55,7 @@ class RepetitionCode(BaseCode):
             self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
         
         # Repeted block
-        for round in range(time):
+        for round in range(number_of_rounds):
             
             # Loop over the ancillary qubits
             data_qubit_count = 0
@@ -89,7 +89,8 @@ class RepetitionCode(BaseCode):
                 # Adding detector
                 if round == 0:
                     self._memory_circuit.append("DETECTOR", [target_rec(-1)])
-                elif round > 0 and round < time:
+                # elif round > 0 and round < number_of_rounds:
+                else:
                     self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-1 - self.number_of_qubits + self.distance)])
                 
         # End of the final round
@@ -99,3 +100,6 @@ class RepetitionCode(BaseCode):
             # Adding detector
             if q > 0 :
                 self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-2), target_rec(-2 - self.number_of_qubits + self.distance)])
+                
+            # Adding the comparison with the expected state
+            self._memory_circuit.append_from_stim_program_text("OBSERVABLE_INCLUDE(0) rec[-1]")
