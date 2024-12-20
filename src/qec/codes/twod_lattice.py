@@ -11,17 +11,18 @@
 # limitations under the License.
 
 from __future__ import annotations
+from abc import abstractmethod
 
 from stim import Circuit, target_rec
 
-from qec import TwoDLattice
+from qec.codes.base_code import BaseCode
 
-__all__ = ["SurfaceCode"]
+__all__ = ["TwoDLattice"]
 
 
-class SurfaceCode(TwoDLattice):
+class TwoDLattice(BaseCode):
     r"""
-    A class for Surface code.
+    A Parent class for 2D Lattice code.
     """
     
     __slots__ = ()
@@ -32,39 +33,30 @@ class SurfaceCode(TwoDLattice):
         **kwargs,
     ) -> None:
         r"""
-        Initialize the Surface code instance.
+        Initialize the 2D Lattice code instance.
         """
         super().__init__(*args, **kwargs)
-
-    def build_memory_circuit(self, number_of_rounds: int = 2) -> None:
-        r"""
-        """
+        
+    def build_memory_circuit(self, number_of_rounds: int = 2) -> Circuit:        
         pass
-    
+
+    @abstractmethod
     def data_qubit_coords(self)->list[tuple]:
         r"""
-        Return the coordinates of the data qubits which are of the form (i,i) where i range from 0 to distance-1 
+        Return the coordinates of the data qubits.   
         """
-        return [(i,i) for i in range(self.distance)]
+        pass
 
+    @abstractmethod
     def z_measure_coords(distance):
         r"""
         Return the coordinates of the Z measurments.
         """
-        coords = [
-            (col + (0.5 if row % 2 == 0 else -0.5), row + 0.5)
-            for row in range(1, distance)
-            for col in range(1, distance + 1, 2)
-        ]
-        return coords
+        pass
 
+    @abstractmethod
     def x_measure_coords(distance):
         r"""
         Return the coordinates of the X measurements.
         """
-        coords = [
-            (col + (0.5 if row % 2 != 0 else -0.5), row - 0.5)
-            for row in range(1, distance + 2)
-            for col in range(2, distance, 2)
-        ]
-        return coords
+        pass
