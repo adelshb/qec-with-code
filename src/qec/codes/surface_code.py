@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from stim import Circuit, target_rec
 
-from qec import TwoDLattice
+from qec.codes.twod_lattice import TwoDLattice
 
 __all__ = ["SurfaceCode"]
 
