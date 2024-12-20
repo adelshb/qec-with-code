@@ -2,6 +2,11 @@
 
 A library for testing Quantum Error Correction (QEC).
 
+## List of implemented QEC
+
+- [Repetition code](notebooks/repetition_code.ipynb)
+- [Surface code](notebooks/surface_code.ipynb)
+
 ## Installation
 
 This package can be installed by cloning the repository and running
