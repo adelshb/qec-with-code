@@ -14,12 +14,12 @@ from __future__ import annotations
 
 from stim import Circuit, target_rec
 
-from qec import QEC
+from qec.codes.base_code import BaseCode
 
-__all__ = ["RepCode"]
+__all__ = ["RepetitionCode"]
 
 
-class RepQEC(QEC):
+class RepetitionCode(BaseCode):
     r"""
     A class for Repetition code.
     """
@@ -34,10 +34,9 @@ class RepQEC(QEC):
         r"""
         Initialize the Repetition code instance.
         """
+        super().__init__(*args, **kwargs)
         
         self._number_of_qubits = 2 * self.distance - 1
-        
-        super(QEC, self).__init__(*args, **kwargs)
         
     @property
     def number_of_qubits(self) -> int:
@@ -46,14 +45,14 @@ class RepQEC(QEC):
         """
         return self._number_of_qubits
     
-    def build_memory_circuit(self, time: int) -> Circuit:
+    def build_memory_circuit(self, time: int = 2) -> Circuit:
         
         # Initialize the circuit
         self._memory_circuit = Circuit()
         
         # Apply depolarization gate to all data qubits
         for q in range(self.distance):
-            self._memory_circuit.append("DEPOLARIZE1" [q], self.depolarize1_rate)
+            self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
         
         # Repeted block
         for round in range(time):
@@ -64,26 +63,26 @@ class RepQEC(QEC):
                 
                 # Reset and apply depolarizing error to all ancillary qubits
                 self._memory_circuit.append("R", [q])
-                self._memory_circuit.append("DEPOLARIZE1" [q], self.depolarize1_rate)
+                self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
                 
                 # Perform CNOT between each neighbood data qubit followed by depolarizing error
                 for ___ in range(2):
                     
                     # Adding a single qubit depolarization for the lower border data qubit as it only occurs in one CNOT
                     if data_qubit_count == self.distance:
-                        self._memory_circuit.append("DEPOLARIZE1" [self.distance], self.depolarize1_rate)
+                        self._memory_circuit.append("DEPOLARIZE1", [self.distance], self.depolarize1_rate)
                         
                     self._memory_circuit.append("CNOT", [data_qubit_count, q])
                     self._memory_circuit.append("DEPOLARIZE2", [data_qubit_count, q], self.depolarize2_rate)
                     
                     # Adding a single qubit depolarization for the upper border data qubit as they only occur in one CNOT
                     if data_qubit_count == 0:
-                        self._memory_circuit.append("DEPOLARIZE1" [0], self.depolarize1_rate)
+                        self._memory_circuit.append("DEPOLARIZE1", [0], self.depolarize1_rate)
                         
                     data_qubit_count +=1
                     
             # Adding measurement with pre-measurement error
-            self._memory_circuit.append("DEPOLARIZE1" [q], self.depolarize1_rate)
+            self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
             self._memory_circuit.append("M", [q])
             
             # Adding detector

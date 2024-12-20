@@ -16,10 +16,10 @@ from abc import ABC, abstractmethod
 from numpy import ndarray
 from stim import Circuit
 
-__all__ = ["QEC"]
+__all__ = ["BaseCode"]
 
 
-class QEC():
+class BaseCode(ABC):
     r"""
     An abstract base class for quantum error correction codes.
     """
@@ -42,7 +42,7 @@ class QEC():
     @property
     def distance(self) -> int:
         r"""
-        The distance of the code
+        The distance of the code.
         """
         return self._distance
     
@@ -58,7 +58,7 @@ class QEC():
         r"""
         The parity data for the last experiment.
         """
-        return self._memory_circuit
+        return self._parity_data
     
     @property
     def depolarize1_rate(self) -> float:
@@ -80,7 +80,6 @@ class QEC():
         Build and return a Stim Circuit object implementing a memory for the given time.
         """
 
-    @abstractmethod
     def collect_parity_data(self, num_samples: int) -> None:
         r"""
         Run Stim sampling experiment and get measurement data.

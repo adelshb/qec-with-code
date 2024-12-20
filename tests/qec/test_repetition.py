@@ -10,7 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from qec import QEC
+from qec import RepetitionCode
+from stim import Circuit
 import pytest
 
 
@@ -18,14 +19,18 @@ class TestQEC:
 
     @pytest.fixture(autouse=True)
     def init(self) -> None:
-        self.code = QEC(
+        self.code = RepetitionCode(
             distance = 5,
             depolarize1_rate = 0.01,
             depolarize2_rate = 0
             )
 
     def test_init(self):
-        assert isinstance(self.code, QEC)
+        assert isinstance(self.code, RepetitionCode)
         assert self.code.distance == 5
         assert self.code.depolarize1_rate == 0.01
         assert self.code.depolarize2_rate == 0
+        
+    def test_build_memory_circuit(self):
+        self.code.build_memory_circuit(time=2)
+        assert type(self.code.memory_circuit) == Circuit
