@@ -13,10 +13,11 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 
+import numpy as np
 from numpy import ndarray
 from stim import Circuit
 import pymatching
-import numpy as np
+
 
 __all__ = ["BaseCode"]
 
