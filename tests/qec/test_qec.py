@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src import QEC
+from qec import QEC
 import pytest
 
 
@@ -25,7 +25,7 @@ class TestQEC:
             )
 
     def test_init(self):
-        assert isinstance(self.state, QEC)
-        assert self.distance == 5
-        assert self.depolarize1_rate == 0.01
-        assert self.depolarize2_rate == 0
+        assert isinstance(self.code, QEC)
+        assert self.code.distance == 5
+        assert self.code.depolarize1_rate == 0.01
+        assert self.code.depolarize2_rate == 0

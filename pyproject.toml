@@ -1,0 +1,29 @@
+[project]
+name = "qec"
+version = "0.0.1"
+authors = [
+  { name = "Adel Sohbi", email = "adel.sohbi@gmail.com" },
+]
+description = "A library for QEC implementations."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=1.26,<2",
+    "scipy>=1.14",
+    "stim>=1.14.0",
+    "pymatching>=2.2.1",    
+]
+
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 88
+target = "src"
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-cov",
+]

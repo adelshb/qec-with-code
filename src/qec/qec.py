@@ -24,7 +24,7 @@ class QEC():
     An abstract base class for quantum error correction codes.
     """
     
-    __slots__ = ("_distance", "_memory_circuit", "_parity_data", "depolarize1_rate", "depolarize2_rate")
+    __slots__ = ("_distance", "_memory_circuit", "_parity_data", "_depolarize1_rate", "_depolarize2_rate")
     
     def __init__(
         self,
@@ -61,14 +61,14 @@ class QEC():
         return self._memory_circuit
     
     @property
-    def depolarize1_rate(self) -> ndarray:
+    def depolarize1_rate(self) -> float:
         r"""
         The depolarization rate for single qubit gate.
         """
         return self._depolarize1_rate
     
     @property
-    def depolarize2_rate(self) -> ndarray:
+    def depolarize2_rate(self) -> float:
         r"""
         The depolarization rate for two-qubit gate.
         """

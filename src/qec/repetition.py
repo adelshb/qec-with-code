@@ -24,6 +24,8 @@ class RepQEC(QEC):
     A class for Repetition code.
     """
     
+    __slots__ = ("_number_of_qubits")
+    
     def __init__(
         self,
         *args, 
