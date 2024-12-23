@@ -37,13 +37,6 @@ class RepetitionCode(BaseCode):
         super().__init__(*args, **kwargs)
         
         self._number_of_qubits = 2 * self.distance - 1
-        
-    @property
-    def number_of_qubits(self) -> int:
-        r"""
-        The total number of physical qubits.
-        """
-        return self._number_of_qubits
     
     def build_memory_circuit(self, number_of_rounds: int = 2) -> Circuit:
         

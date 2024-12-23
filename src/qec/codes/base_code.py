@@ -27,13 +27,13 @@ class BaseCode(ABC):
     An abstract base class for quantum error correction codes.
     """
     
-    __slots__ = ("_distance", "_memory_circuit", "_parity_data", "_depolarize1_rate", "_depolarize2_rate", "_sampler")
+    __slots__ = ("_distance", "_memory_circuit", "_parity_data", "_depolarize1_rate", "_depolarize2_rate", "_sampler", "_number_of_qubits")
     
     def __init__(
         self,
-        distance: int,
-        depolarize1_rate: float,
-        depolarize2_rate: float,
+        distance: int = 3,
+        depolarize1_rate: float = 0,
+        depolarize2_rate: float = 0,
     ) -> None:
         
         self._distance = distance
@@ -41,7 +41,15 @@ class BaseCode(ABC):
         self._depolarize2_rate = depolarize2_rate
         self._memory_circuit: Circuit
         self._parity_data: list[ndarray] = []
-         
+        self._number_of_qubits: int
+    
+    @property
+    def number_of_qubits(self) -> int:
+        r"""
+        The total number of physical qubits.
+        """
+        return self._number_of_qubits
+      
     @property
     def distance(self) -> int:
         r"""

@@ -52,5 +52,7 @@ class TwoDLattice(BaseCode):
         """
         pass
         
-    def build_memory_circuit(self, number_of_rounds: int = 2) -> Circuit:        
+    def build_memory_circuit(self, number_of_rounds: int = 2) -> Circuit:
+        r"""
+        """
         pass

@@ -34,7 +34,7 @@ class RotatedSurfaceCode(TwoDLattice):
         r"""
         Initialize the Surface code instance.
         """
-        # self.build_lattice()
+
         super().__init__(*args, **kwargs)
         self.build_lattice()
         
@@ -153,6 +153,7 @@ class RotatedSurfaceCode(TwoDLattice):
         ]
         
         self._lattice = {tuple(c): i for i, c in enumerate(data_qubits_coords + x_qubits_coords + z_qubits_coords)}
+        self._number_of_qubits = len(self.lattice)
 
         self._data_qubits = [self._lattice[coord] for coord in data_qubits_coords]
         
