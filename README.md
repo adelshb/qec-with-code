@@ -105,3 +105,6 @@ Even after your PR is merged, we encourage you to stay involved and contribute t
 -Be respectful: Remember, open-source is a community. A positive and collaborative attitude goes a long way.
 
 Thank you for contributing!
+
+## License
+**[Apache License 2.0](LICENSE)**
