@@ -90,8 +90,9 @@ class RepetitionCode(BaseCode):
             self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
             self._memory_circuit.append("M", [q])
             
-            ##TODO 
-            # Add detector
+            # Adding detector
+            if q > 0 :
+                self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-2), target_rec(-2 - self.number_of_qubits + self.distance)])
             
             # Adding the comparison with the expected state
             self._memory_circuit.append_from_stim_program_text("OBSERVABLE_INCLUDE(0) rec[-1]")
