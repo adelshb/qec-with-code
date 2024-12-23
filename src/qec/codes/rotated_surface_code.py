@@ -11,7 +11,6 @@
 # limitations under the License.
 
 from __future__ import annotations
-from abc import staticmethod
 
 from stim import Circuit, target_rec
 
@@ -35,18 +34,26 @@ class RotatedSurfaceCode(TwoDLattice):
         r"""
         Initialize the Surface code instance.
         """
+        # self.build_lattice()
         super().__init__(*args, **kwargs)
         self.build_lattice()
         
     @property
-    def x_qubits(self) -> int:
+    def data_qubits(self) -> list:
+        r"""
+        The data qubits.
+        """
+        return self._data_qubits
+        
+    @property
+    def x_qubits(self) -> dict:
         r"""
         The qubits for X checks.
         """
         return self._x_qubits
     
     @property
-    def z_qubits(self) -> int:
+    def z_qubits(self) -> dict:
         r"""
         The qubits for Z checks.
         """
@@ -59,7 +66,7 @@ class RotatedSurfaceCode(TwoDLattice):
         # Initialization
         self._memory_circuit = Circuit()
     
-        for q in self.lattice.values():
+        for q in self.data_qubits:
             self._memory_circuit.append("R", [q])
             self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
         
@@ -77,19 +84,23 @@ class RotatedSurfaceCode(TwoDLattice):
                 self._memory_circuit.append("R", [q])
                 self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
             
-            # Perform CNOTs with specific order to avoid hooks (error propagation)
+            # Perform CNOTs with specific order to avoid hook errors (error propagation)
             for i in range(4):
                 for q in self.z_qubits.keys():
-                    control = self.z_qubits[q][i]
-                    if control in self.lattice:
+                    try:
+                        control = self.lattice[self.z_qubits[q][i]]
                         self._memory_circuit.append("CNOT", [control, q])
                         self._memory_circuit.append("DEPOLARIZE2", [control, q], self.depolarize2_rate)
+                    except KeyError:
+                        pass
                 
                 for q in self.x_qubits:
-                    target = self.x_qubits[q][i]
-                    if target in self.lattice:
+                    try:
+                        target = self.lattice[self.x_qubits[q][i]]
                         self._memory_circuit.append("CNOT", [q, target])
                         self._memory_circuit.append("DEPOLARIZE2", [target, q], self.depolarize2_rate)
+                    except KeyError:
+                        pass
 
             # Undo the Hadamard for the X measurement
             for q in self.x_qubits.keys():
@@ -97,7 +108,7 @@ class RotatedSurfaceCode(TwoDLattice):
                 self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
    
             # Perform measurements
-            for q in self.x_qubits.keys() + self.z_qubits.keys():
+            for q in list(self.x_qubits.keys()) + list(self.z_qubits.keys()):
                 self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
                 self._memory_circuit.append("M", [q])
                 
@@ -106,15 +117,15 @@ class RotatedSurfaceCode(TwoDLattice):
                     self._memory_circuit.append("DETECTOR", [target_rec(-1)])
                 else:
                     self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-1 - self.number_of_qubits + self.distance)])
-   
+
         # Finalize
         for q in self._data_qubits:
             self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
             self._memory_circuit.append("M", [q])
             
-            # Adding detector
-            if q > 0 :
-                self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-2), target_rec(-2 - self.number_of_qubits + self.distance)])
+            # # Adding detector
+            # if q > 0 :
+            #     self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-2), target_rec(-2 - self.number_of_qubits + self.distance)])
                 
             # Adding the comparison with the expected state
             self._memory_circuit.append_from_stim_program_text("OBSERVABLE_INCLUDE(0) rec[-1]")
@@ -125,8 +136,8 @@ class RotatedSurfaceCode(TwoDLattice):
         """
         
         # Compute coordinates of the data qubits which are of the form (i,i) where i range from 0 to distance-1 
-        data_qubits_coords = [(i,i) for i in range(self.distance)]
-        
+        data_qubits_coords = [(col, row) for row in range(1, self.distance + 1) for col in range(1, self.distance + 1)]
+
         # Compute the coordinates of the X qubits measurements.
         x_qubits_coords = [
             (col + (0.5 if row % 2 != 0 else -0.5), row - 0.5)

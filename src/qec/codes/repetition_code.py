@@ -89,7 +89,6 @@ class RepetitionCode(BaseCode):
                 # Adding detector
                 if round == 0:
                     self._memory_circuit.append("DETECTOR", [target_rec(-1)])
-                # elif round > 0 and round < number_of_rounds:
                 else:
                     self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-1 - self.number_of_qubits + self.distance)])
                 

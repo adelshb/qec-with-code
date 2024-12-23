@@ -54,24 +54,3 @@ class TwoDLattice(BaseCode):
         
     def build_memory_circuit(self, number_of_rounds: int = 2) -> Circuit:        
         pass
-
-    @abstractmethod
-    def data_qubit_coords(self)->list[tuple]:
-        r"""
-        Return the coordinates of the data qubits.   
-        """
-        pass
-
-    @abstractmethod
-    def z_measure_coords(distance):
-        r"""
-        Return the coordinates of the Z measurments.
-        """
-        pass
-
-    @abstractmethod
-    def x_measure_coords(distance):
-        r"""
-        Return the coordinates of the X measurements.
-        """
-        pass
