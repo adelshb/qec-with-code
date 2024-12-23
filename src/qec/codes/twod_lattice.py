@@ -25,7 +25,7 @@ class TwoDLattice(BaseCode):
     A Parent class for 2D Lattice code.
     """
     
-    __slots__ = ()
+    __slots__ = ("_lattice")
     
     def __init__(
         self,
@@ -36,6 +36,21 @@ class TwoDLattice(BaseCode):
         Initialize the 2D Lattice code instance.
         """
         super().__init__(*args, **kwargs)
+        self._lattice: dict[tuple[float, float], int]
+        
+    @property
+    def lattice(self)->dict[tuple[float, float], int]:
+        r"""
+        Return the lattice coordinates.
+        """
+        return self._lattice
+    
+    @abstractmethod
+    def build_lattice(self):
+        r"""
+        Build the 2D lattice.
+        """
+        pass
         
     def build_memory_circuit(self, number_of_rounds: int = 2) -> Circuit:        
         pass
