@@ -141,35 +141,69 @@ class RotatedSurfaceCode(TwoDLattice):
             self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
             self._memory_circuit.append("M", [q])
             self.add_outcome(outcome=target_rec(-1), qubit=q, round=round, type="data")
+        count = self.measurement.register_count
 
-            # Adding detector
-            for qx in self.x_qubits.keys():
-                adjacent_data_qubits = [
-                    self.lattice[i]
-                    for i in self.x_qubits[qx]
-                    if i in self.lattice.keys()
-                ]
-                recs = [
-                    self.get_outcome(qubit=qd, round=number_of_rounds - 1)
-                    for qd in adjacent_data_qubits
-                ]
-                if None not in recs:
-                    recs += [self.get_outcome(qubit=qx, round=number_of_rounds - 1)]
-                    self._memory_circuit.append("DETECTOR", recs)
+        # Adding detector
+        for qx in self.x_qubits.keys():
+            adjacent_data_qubits = [
+                self.lattice[i] for i in self.x_qubits[qx] if i in self.lattice.keys()
+            ]
+            # Get their last measurement register_id
+            recs = [
+                target_rec(
+                    self.measurement.get_register_id(
+                        qubit=qd, round=number_of_rounds - 1
+                    )
+                    - count
+                )
+                for qd in adjacent_data_qubits
+            ]
+            recs += [
+                target_rec(
+                    self.measurement.get_register_id(
+                        qubit=qx, round=number_of_rounds - 1
+                    )
+                    - count
+                )
+            ]
+            self._memory_circuit.append("DETECTOR", recs)
 
-            for qz in self.z_qubits.keys():
-                adjacent_data_qubits = [
-                    self.lattice[i]
-                    for i in self.z_qubits[qz]
-                    if i in self.lattice.keys()
-                ]
-                recs = [
-                    self.get_outcome(qubit=qd, round=number_of_rounds - 1)
-                    for qd in adjacent_data_qubits
-                ]
-                if None not in recs:
-                    recs += [self.get_outcome(qubit=qz, round=number_of_rounds - 1)]
-                    self._memory_circuit.append("DETECTOR", recs)
+            recs += [
+                target_rec(
+                    self.measurement.get_register_id(
+                        qubit=qx, round=number_of_rounds - 1
+                    )
+                    - count
+                )
+            ]
+            self._memory_circuit.append("DETECTOR", recs)
+
+        for qz in self.z_qubits.keys():
+
+            # Get the qubit index
+            adjacent_data_qubits = [
+                self.lattice[i] for i in self.z_qubits[qz] if i in self.lattice.keys()
+            ]
+
+            # Get their last measurement register_id
+            recs = [
+                target_rec(
+                    self.measurement.get_register_id(
+                        qubit=qd, round=number_of_rounds - 1
+                    )
+                    - count
+                )
+                for qd in adjacent_data_qubits
+            ]
+            recs += [
+                target_rec(
+                    self.measurement.get_register_id(
+                        qubit=qz, round=number_of_rounds - 1
+                    )
+                    - count
+                )
+            ]
+            self._memory_circuit.append("DETECTOR", recs)
 
         # Adding the comparison with the expected state
         count = self.measurement.register_count

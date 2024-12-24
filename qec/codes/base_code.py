@@ -139,6 +139,7 @@ class BaseCode(ABC):
         detector_error_model = self.memory_circuit.detector_error_model(
             decompose_errors=False
         )
+
         matcher = pymatching.Matching.from_detector_error_model(detector_error_model)
         predictions = matcher.decode_batch(detection_events)
 
