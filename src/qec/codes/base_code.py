@@ -47,7 +47,6 @@ class BaseCode(ABC):
         self._depolarize1_rate = depolarize1_rate
         self._depolarize2_rate = depolarize2_rate
         self._memory_circuit: Circuit
-        self._parity_data: list[ndarray] = []
         self._number_of_qubits: int
     
     @property
