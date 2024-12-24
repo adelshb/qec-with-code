@@ -1,5 +1,7 @@
 # QEC with Code
 
+[![Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue)](https://opensource.org/licenses/Apache-2.0)
+
 This repository provides a collection of **Quantum Error Correction (QEC)** code implementations using **Stim**. The goal is to demonstrate how QEC works with different error thresholds and provide practical examples of implementing error correction codes on quantum circuits.
 
 ### Overview

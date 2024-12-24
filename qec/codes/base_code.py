@@ -18,7 +18,6 @@ from numpy import ndarray
 from stim import Circuit
 import pymatching
 
-
 __all__ = ["BaseCode"]
 
 

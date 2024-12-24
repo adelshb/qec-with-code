@@ -10,9 +10,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from qec import RepetitionCode
-from stim import Circuit
 import pytest
+
+from stim import Circuit
+
+from qec import RepetitionCode
 
 
 class TestRepetitionCode:

@@ -9,4 +9,4 @@ omit =
 show_missing = True
 skip_covered = True
 include = 
-    src/*
+    qec/*
