@@ -15,7 +15,7 @@ from stim import Circuit
 import pytest
 
 
-class TestQEC:
+class TestRepetitionCode:
 
     @pytest.fixture(autouse=True)
     def init(self) -> None:

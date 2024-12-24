@@ -21,7 +21,7 @@ __all__ = ["SurfaceCode"]
 
 class RotatedSurfaceCode(TwoDLattice):
     r"""
-    A class for Surface code.
+    A class for the Rotated Surface code.
     """
     
     __slots__ = ("_data_qubits", "_x_qubits", "_z_qubits")
@@ -32,7 +32,7 @@ class RotatedSurfaceCode(TwoDLattice):
         **kwargs,
     ) -> None:
         r"""
-        Initialize the Surface code instance.
+        Initialize the Rotated Surface Code instance.
         """
 
         super().__init__(*args, **kwargs)
@@ -111,12 +111,15 @@ class RotatedSurfaceCode(TwoDLattice):
             for q in list(self.x_qubits.keys()) + list(self.z_qubits.keys()):
                 self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
                 self._memory_circuit.append("M", [q])
-                
+                self.add_outcome(outcome=target_rec(-1), qubit=q, round=round, type='check')
+    
                 # Adding detector
                 if round == 0:
-                    self._memory_circuit.append("DETECTOR", [target_rec(-1)])
+                    # self._memory_circuit.append("DETECTOR", [target_rec(-1)])
+                    self._memory_circuit.append("DETECTOR", [self.get_outcome(qubit=q, round=round)])
                 else:
-                    self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-1 - self.number_of_qubits + self.distance)])
+                    # self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-1 - self.number_of_qubits + self.distance)])
+                    self._memory_circuit.append("DETECTOR", [self.get_outcome(qubit=q, round=round), self.get_outcome(qubit=q, round=round-1)])
 
         # Finalize
         for q in self._data_qubits:

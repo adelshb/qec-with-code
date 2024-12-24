@@ -16,6 +16,7 @@ from abc import abstractmethod
 from stim import Circuit, target_rec
 
 from qec.codes.base_code import BaseCode
+from qec.syndrome.measurement import Measurement
 
 __all__ = ["TwoDLattice"]
 
@@ -25,7 +26,7 @@ class TwoDLattice(BaseCode):
     A Parent class for 2D Lattice code.
     """
     
-    __slots__ = ("_lattice")
+    __slots__ = ("_lattice", "_measurement")
     
     def __init__(
         self,
@@ -37,6 +38,7 @@ class TwoDLattice(BaseCode):
         """
         super().__init__(*args, **kwargs)
         self._lattice: dict[tuple[float, float], int]
+        self._measurement = Measurement()
         
     @property
     def lattice(self)->dict[tuple[float, float], int]:
@@ -44,6 +46,13 @@ class TwoDLattice(BaseCode):
         Return the lattice coordinates.
         """
         return self._lattice
+    
+    @property
+    def measurement(self):
+        r"""
+        Return the measurement collection.
+        """
+        return self._measurement
     
     @abstractmethod
     def build_lattice(self):
@@ -56,3 +65,24 @@ class TwoDLattice(BaseCode):
         r"""
         """
         pass
+    
+    def get_outcome(
+        self, 
+        qubit: any, 
+        round: int, 
+    )-> any:
+        r"""
+        Return the outcome for the qubit at the specified round or return None if not in the collection.
+        """
+        self._measurement.get_outcome(qubit=qubit, round=round)
+        
+    def add_outcome(
+        self, 
+        outcome: any, 
+        qubit: any, 
+        round: int, 
+        type: str | None
+    )->None:
+        r"""
+        """
+        self._measurement.add_outcome(outcome=outcome,qubit=qubit,round=round,type=type)
