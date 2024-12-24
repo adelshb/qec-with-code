@@ -14,9 +14,16 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+docs = [
+  "jupyter-book>=1.0",
+  "jupytext>1.12"
+]
 dev = [
   "pytest>=8.0",
   "pytest-cov>=3.0.0",
+  "black>=24.10.0",
+  "flake8>=7.1.1",
+  "pre-commit>=4.0.1"
 ]
 
 [build-system]
