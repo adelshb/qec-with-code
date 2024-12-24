@@ -12,27 +12,23 @@
 
 import pytest
 
-from stim import Circuit
-
-from qec import RepetitionCode
+from qec import Measurement
 
 
-class TestRepetitionCode:
+class TestMeasurement:
 
     @pytest.fixture(autouse=True)
     def init(self) -> None:
-        self.code = RepetitionCode(
-            distance = 5,
-            depolarize1_rate = 0.01,
-            depolarize2_rate = 0
-            )
+        self.measurement = Measurement()
 
     def test_init(self):
-        assert isinstance(self.code, RepetitionCode)
-        assert self.code.distance == 5
-        assert self.code.depolarize1_rate == 0.01
-        assert self.code.depolarize2_rate == 0
+        assert isinstance(self.measurement, Measurement)
         
-    def test_build_memory_circuit(self):
-        self.code.build_memory_circuit(number_of_rounds=2)
-        assert type(self.code.memory_circuit) == Circuit
+    def test_add_and_get_measurement(self):
+        self.measurement.add_outcome(
+            outcome='0',
+            qubit=0,
+            round=1,
+            type='check'
+        )
+        assert self.measurement.get_outcome(qubit=0,round=1) == '0'

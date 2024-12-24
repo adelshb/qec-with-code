@@ -12,27 +12,19 @@
 
 import pytest
 
-from stim import Circuit
-
-from qec import RepetitionCode
+from qec import RotatedSurfaceCode
 
 
-class TestRepetitionCode:
+class TestRotatedSurfaceCode:
 
     @pytest.fixture(autouse=True)
     def init(self) -> None:
-        self.code = RepetitionCode(
-            distance = 5,
+        self.code = RotatedSurfaceCode(
+            distance = 3,
             depolarize1_rate = 0.01,
             depolarize2_rate = 0
             )
 
-    def test_init(self):
-        assert isinstance(self.code, RepetitionCode)
-        assert self.code.distance == 5
-        assert self.code.depolarize1_rate == 0.01
-        assert self.code.depolarize2_rate == 0
-        
-    def test_build_memory_circuit(self):
-        self.code.build_memory_circuit(number_of_rounds=2)
-        assert type(self.code.memory_circuit) == Circuit
+    def test_build_lattice(self):
+        assert self.code.lattice == {(1, 1): 0, (2, 1): 1, (3, 1): 2, (1, 2): 3, (2, 2): 4, (3, 2): 5, (1, 3): 6, (2, 3): 7, (3, 3): 8, (2.5, 0.5): 9, (1.5, 1.5): 10, (2.5, 2.5): 11, (1.5, 3.5): 12, (0.5, 1.5): 13, (2.5, 1.5): 14, (1.5, 2.5): 15, (3.5, 2.5): 16}
+        assert self.code.data_qubits == [0, 1, 2, 3, 4, 5, 6, 7, 8]

@@ -37,15 +37,13 @@ class RepetitionCode(BaseCode):
         super().__init__(*args, **kwargs)
         
         self._number_of_qubits = 2 * self.distance - 1
-        
-    @property
-    def number_of_qubits(self) -> int:
-        r"""
-        The total number of physical qubits.
-        """
-        return self._number_of_qubits
     
     def build_memory_circuit(self, number_of_rounds: int = 2) -> Circuit:
+        r"""
+        Build and return a Stim Circuit object implementing a memory for the given time.
+        
+        :param number_of_rounds: The number of rounds in the memory.
+        """
         
         # Initialize the circuit
         self._memory_circuit = Circuit()
@@ -89,17 +87,17 @@ class RepetitionCode(BaseCode):
                 # Adding detector
                 if round == 0:
                     self._memory_circuit.append("DETECTOR", [target_rec(-1)])
-                # elif round > 0 and round < number_of_rounds:
                 else:
                     self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-1 - self.number_of_qubits + self.distance)])
                 
         # End of the final round
         for q in range(self.distance):
+            self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
             self._memory_circuit.append("M", [q])
             
             # Adding detector
             if q > 0 :
                 self._memory_circuit.append("DETECTOR", [target_rec(-1), target_rec(-2), target_rec(-2 - self.number_of_qubits + self.distance)])
-                
+            
             # Adding the comparison with the expected state
             self._memory_circuit.append_from_stim_program_text("OBSERVABLE_INCLUDE(0) rec[-1]")
