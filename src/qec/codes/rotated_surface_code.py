@@ -16,7 +16,7 @@ from stim import Circuit, target_rec
 
 from qec.codes.twod_lattice import TwoDLattice
 
-__all__ = ["SurfaceCode"]
+__all__ = ["RotatedSurfaceCode"]
 
 
 class RotatedSurfaceCode(TwoDLattice):
