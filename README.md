@@ -100,11 +100,6 @@ Our maintainers will review your pull request. Be open to feedback and willing t
 ### 9. Stay Involved
 Even after your PR is merged, we encourage you to stay involved and contribute to the project by reporting bugs, submitting more features, or helping with documentation!
 
-### Additional Tips:
--Test your changes: If the project uses tests, ensure they pass before submitting your PR.
--Be respectful: Remember, open-source is a community. A positive and collaborative attitude goes a long way.
-
-Thank you for contributing!
 
 ## License
 **[Apache License 2.0](LICENSE)**
