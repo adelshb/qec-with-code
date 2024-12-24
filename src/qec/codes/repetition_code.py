@@ -39,6 +39,11 @@ class RepetitionCode(BaseCode):
         self._number_of_qubits = 2 * self.distance - 1
     
     def build_memory_circuit(self, number_of_rounds: int = 2) -> Circuit:
+        r"""
+        Build and return a Stim Circuit object implementing a memory for the given time.
+        
+        :param number_of_rounds: The number of rounds in the memory.
+        """
         
         # Initialize the circuit
         self._memory_circuit = Circuit()

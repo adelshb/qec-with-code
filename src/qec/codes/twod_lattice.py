@@ -48,14 +48,14 @@ class TwoDLattice(BaseCode):
         return self._lattice
     
     @property
-    def measurement(self):
+    def measurement(self)-> Measurement:
         r"""
         Return the measurement collection.
         """
         return self._measurement
     
     @abstractmethod
-    def build_lattice(self):
+    def build_lattice(self)->None:
         r"""
         Build the 2D lattice.
         """
@@ -63,6 +63,9 @@ class TwoDLattice(BaseCode):
         
     def build_memory_circuit(self, number_of_rounds: int = 2) -> Circuit:
         r"""
+        Build and return a Stim Circuit object implementing a memory for the given time.
+        
+        :param number_of_rounds: The number of rounds in the memory.
         """
         pass
     
@@ -73,6 +76,9 @@ class TwoDLattice(BaseCode):
     )-> any:
         r"""
         Return the outcome for the qubit at the specified round or return None if not in the collection.
+        
+        :param qubit: The qubit on which the measurement is performed.
+        :param round: The round during which the measurement is performed.
         """
         self._measurement.get_outcome(qubit=qubit, round=round)
         
@@ -84,5 +90,11 @@ class TwoDLattice(BaseCode):
         type: str | None
     )->None:
         r"""
+        Add an outcome to the collection.
+        
+        :param outcome: The outcome to store.
+        :param qubit: The qubit on which the measurement is performed.
+        :param round: The round during which the measurement is performed.
+        :param type: The type of measurement.
         """
         self._measurement.add_outcome(outcome=outcome,qubit=qubit,round=round,type=type)

@@ -27,7 +27,7 @@ class BaseCode(ABC):
     An abstract base class for quantum error correction codes.
     """
     
-    __slots__ = ("_distance", "_memory_circuit", "_parity_data", "_depolarize1_rate", "_depolarize2_rate", "_sampler", "_number_of_qubits")
+    __slots__ = ("_distance", "_memory_circuit", "_depolarize1_rate", "_depolarize2_rate", "_sampler", "_number_of_qubits")
     
     def __init__(
         self,
@@ -35,6 +35,13 @@ class BaseCode(ABC):
         depolarize1_rate: float = 0,
         depolarize2_rate: float = 0,
     ) -> None:
+        r"""
+        Initialization of the Base Code class.
+        
+        :param distance: Distance of the code.
+        :param depolarize1_rate: Single qubit depolarization rate. Apply after each single-qubit gate.
+        :param depolarize2_rate: Two qubit depolarization rate. Apply after each two-qubit gate.
+        """
         
         self._distance = distance
         self._depolarize1_rate = depolarize1_rate
@@ -65,13 +72,6 @@ class BaseCode(ABC):
         return self._memory_circuit
     
     @property
-    def parity_data(self) -> ndarray:
-        r"""
-        The parity data for the last experiment.
-        """
-        return self._parity_data
-    
-    @property
     def depolarize1_rate(self) -> float:
         r"""
         The depolarization rate for single qubit gate.
@@ -96,12 +96,18 @@ class BaseCode(ABC):
     def build_memory_circuit(self, number_of_rounds: int) -> None:
         r"""
         Build and return a Stim Circuit object implementing a memory for the given time.
+        
+        :param number_of_rounds: The number of rounds in the memory.
         """
 
     def compute_logical_errors(self, num_shots: int) -> int:
+        r"""
+        Sample the memory circuit and return the number of errors.
+        
+        :param num_shots: The number of samples.
+        """
         
         # Sample the memory circuit
-        # self._sampler = self.memory_circuit.detector_error_model(decompose_errors=True)
         self._sampler = self.memory_circuit.compile_detector_sampler()
         detection_events, observable_flips = self.sampler.sample(num_shots, separate_observables=True)
 

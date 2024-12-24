@@ -40,6 +40,9 @@ class Measurement:
     )-> any:
         r"""
         Return the outcome for the qubit at the specified round or return None if not in the collection.
+        
+        :param qubit: The qubit on which the measurement is performed.
+        :param round: The round during which the measurement is performed.
         """
         try: 
             return self.data[round][qubit]
@@ -53,6 +56,14 @@ class Measurement:
         round: int, 
         type: str | None
     )->None:
+        r"""
+        Add an outcome to the collection.
+        
+        :param outcome: The outcome to store.
+        :param qubit: The qubit on which the measurement is performed.
+        :param round: The round during which the measurement is performed.
+        :param type: The type of measurement.
+        """
         
         if type not in ["check", "data", None]:
             ValueError("The value of type must be either 'check' or 'data'.")

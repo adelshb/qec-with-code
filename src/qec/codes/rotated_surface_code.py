@@ -61,6 +61,9 @@ class RotatedSurfaceCode(TwoDLattice):
 
     def build_memory_circuit(self, number_of_rounds: int = 2) -> None:
         r"""
+        Build and return a Stim Circuit object implementing a memory for the given time.
+        
+        :param number_of_rounds: The number of rounds in the memory.
         """
         
         # Initialization
@@ -168,7 +171,9 @@ class RotatedSurfaceCode(TwoDLattice):
     @staticmethod
     def get_adjacent_coords(coord: tuple[float, float])->list[tuple[float, float]]:
         r"""
-        Returns the four diagonal coordinates at 0.5 offset from the input coordinate, ordered as top-left, top-right, bottom-left, bottom-right (X-stabilizer plaquette).   
+        Returns the four diagonal coordinates at 0.5 offset from the input coordinate, ordered as top-left, top-right, bottom-left, bottom-right (X-stabilizer plaquette).  
+        
+        :param coords: The coordinates of the vertex we want to have the neighboors. 
         """
         col, row = coord
         return [(col + dx, row + dy) for dx in [-0.5, 0.5] for dy in [-0.5, 0.5]]
