@@ -1,4 +1,4 @@
 # .flake8
 [flake8]
-max-line-length = 88  # Make sure this matches `black`'s line length
-extend-ignore = E203, W503  # Ignore specific rules that conflict with black
+max-line-length = 88
+extend-ignore = E203, W503

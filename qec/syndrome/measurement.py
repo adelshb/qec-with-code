@@ -20,55 +20,83 @@ class Measurement:
     A class for collection of measurement outcomes.
     """
 
-    __slots__ = ("_data")
+    __slots__ = ("_data", "_register_count")
 
     def __init__(self) -> None:
 
         self._data = {}
-        
+        self._register_count = 0
+
     @property
-    def data(self)->dict:
+    def data(self) -> dict:
         r"""
         The collection of outcomes.
         """
         return self._data
-    
-    def get_outcome(
-        self, 
-        qubit: any, 
-        round: int, 
-    )-> any:
+
+    @property
+    def register_count(self) -> int:
         r"""
-        Return the outcome for the qubit at the specified round or return None if not in the collection.
-        
+        The number of outcome collected.
+        """
+        return self._register_count
+
+    def get_outcome(
+        self,
+        qubit: any,
+        round: int,
+    ) -> any:
+        r"""
+        Return the outcome for the qubit at the specified round or return None.
+
         :param qubit: The qubit on which the measurement is performed.
         :param round: The round during which the measurement is performed.
         """
-        try: 
-            return self.data[round][qubit]
+
+        try:
+            return self.data[round][qubit]["outcome"]
         except KeyError:
             return None
-        
+
+    def get_register_id(
+        self,
+        qubit: any,
+        round: int,
+    ) -> any:
+        r"""
+        Return the register_id for the qubit at the specified round or return None.
+
+        :param qubit: The qubit on which the measurement is performed.
+        :param round: The round during which the measurement is performed.
+        """
+
+        try:
+            return self.data[round][qubit]["register_id"]
+        except KeyError:
+            return None
+
     def add_outcome(
-        self, 
-        outcome: any, 
-        qubit: any, 
-        round: int, 
-        type: str | None
-    )->None:
+        self, outcome: any, qubit: any, round: int, type: str | None
+    ) -> None:
         r"""
         Add an outcome to the collection.
-        
+
         :param outcome: The outcome to store.
         :param qubit: The qubit on which the measurement is performed.
         :param round: The round during which the measurement is performed.
         :param type: The type of measurement.
         """
-        
+
         if type not in ["check", "data", None]:
             ValueError("The value of type must be either 'check' or 'data'.")
-        
+
         if round not in self._data.keys():
             self._data[round] = {}
-        
-        self._data[round][qubit] = outcome
+
+        self._data[round][qubit] = {
+            "outcome": outcome,
+            "type": type,
+            "register_id": self.register_count,
+        }
+
+        self._register_count += 1

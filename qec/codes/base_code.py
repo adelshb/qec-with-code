@@ -14,9 +14,10 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 import numpy as np
-from numpy import ndarray
 from stim import Circuit
 import pymatching
+
+from qec.syndrome.measurement import Measurement
 
 __all__ = ["BaseCode"]
 
@@ -25,9 +26,17 @@ class BaseCode(ABC):
     r"""
     An abstract base class for quantum error correction codes.
     """
-    
-    __slots__ = ("_distance", "_memory_circuit", "_depolarize1_rate", "_depolarize2_rate", "_sampler", "_number_of_qubits")
-    
+
+    __slots__ = (
+        "_distance",
+        "_memory_circuit",
+        "_depolarize1_rate",
+        "_depolarize2_rate",
+        "_sampler",
+        "_number_of_qubits",
+        "_measurement",
+    )
+
     def __init__(
         self,
         distance: int = 3,
@@ -36,81 +45,100 @@ class BaseCode(ABC):
     ) -> None:
         r"""
         Initialization of the Base Code class.
-        
+
         :param distance: Distance of the code.
-        :param depolarize1_rate: Single qubit depolarization rate. Apply after each single-qubit gate.
-        :param depolarize2_rate: Two qubit depolarization rate. Apply after each two-qubit gate.
+        :param depolarize1_rate: Single qubit depolarization rate.
+        :param depolarize2_rate: Two qubit depolarization rate.
         """
-        
+
         self._distance = distance
         self._depolarize1_rate = depolarize1_rate
         self._depolarize2_rate = depolarize2_rate
         self._memory_circuit: Circuit
         self._number_of_qubits: int
-    
+        self._measurement = Measurement()
+
     @property
     def number_of_qubits(self) -> int:
         r"""
         The total number of physical qubits.
         """
         return self._number_of_qubits
-      
+
     @property
     def distance(self) -> int:
         r"""
         The distance of the code.
         """
         return self._distance
-    
+
     @property
     def memory_circuit(self) -> Circuit:
         r"""
         The circuit for the memory.
         """
         return self._memory_circuit
-    
+
     @property
     def depolarize1_rate(self) -> float:
         r"""
         The depolarization rate for single qubit gate.
         """
         return self._depolarize1_rate
-    
+
     @property
     def depolarize2_rate(self) -> float:
         r"""
         The depolarization rate for two-qubit gate.
         """
         return self._depolarize2_rate
-    
+
     @property
     def sampler(self) -> any:
         r"""
         The sampler from the memory circuit
         """
         return self._sampler
-    
+
+    @property
+    def measurement(self) -> Measurement:
+        r"""
+        Return the measurement collection.
+        """
+        return self._measurement
+
+    @property
+    def register_count(self) -> int:
+        r"""
+        The number of outcome collected.
+        """
+        return self.measurement.register_count
+
     @abstractmethod
     def build_memory_circuit(self, number_of_rounds: int) -> None:
         r"""
         Build and return a Stim Circuit object implementing a memory for the given time.
-        
+
         :param number_of_rounds: The number of rounds in the memory.
         """
 
     def compute_logical_errors(self, num_shots: int) -> int:
         r"""
         Sample the memory circuit and return the number of errors.
-        
+
         :param num_shots: The number of samples.
         """
-        
+
         # Sample the memory circuit
         self._sampler = self.memory_circuit.compile_detector_sampler()
-        detection_events, observable_flips = self.sampler.sample(num_shots, separate_observables=True)
+        detection_events, observable_flips = self.sampler.sample(
+            num_shots, separate_observables=True
+        )
 
         # Configure the decoder using the memory circuit then run the decoder
-        detector_error_model = self.memory_circuit.detector_error_model(decompose_errors=True)
+        detector_error_model = self.memory_circuit.detector_error_model(
+            decompose_errors=False
+        )
         matcher = pymatching.Matching.from_detector_error_model(detector_error_model)
         predictions = matcher.decode_batch(detection_events)
 
@@ -122,3 +150,31 @@ class BaseCode(ABC):
             if not np.array_equal(actual_for_shot, predicted_for_shot):
                 num_errors += 1
         return num_errors
+
+    def get_outcome(
+        self,
+        qubit: any,
+        round: int,
+    ) -> any:
+        r"""
+        Return the outcome for the qubit at the specified round or None.
+
+        :param qubit: The qubit on which the measurement is performed.
+        :param round: The round during which the measurement is performed.
+        """
+        return self._measurement.get_outcome(qubit=qubit, round=round)
+
+    def add_outcome(
+        self, outcome: any, qubit: any, round: int, type: str | None
+    ) -> None:
+        r"""
+        Add an outcome to the collection.
+
+        :param outcome: The outcome to store.
+        :param qubit: The qubit on which the measurement is performed.
+        :param round: The round during which the measurement is performed.
+        :param type: The type of measurement.
+        """
+        self._measurement.add_outcome(
+            outcome=outcome, qubit=qubit, round=round, type=type
+        )

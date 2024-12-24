@@ -23,12 +23,10 @@ class TestMeasurement:
 
     def test_init(self):
         assert isinstance(self.measurement, Measurement)
-        
+        assert self.measurement.data == {}
+        assert self.measurement.register_count == 0
+
     def test_add_and_get_measurement(self):
-        self.measurement.add_outcome(
-            outcome='0',
-            qubit=0,
-            round=1,
-            type='check'
-        )
-        assert self.measurement.get_outcome(qubit=0,round=1) == '0'
+        self.measurement.add_outcome(outcome="0", qubit=0, round=1, type="check")
+        assert self.measurement.get_outcome(qubit=0, round=1) == "0"
+        assert self.measurement.register_count == 1
