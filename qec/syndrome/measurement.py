@@ -90,7 +90,7 @@ class Measurement:
         if type not in ["check", "data", None]:
             ValueError("The value of type must be either 'check' or 'data'.")
 
-        if round not in self._data.keys():
+        if round not in self.data.keys():
             self._data[round] = {}
 
         self._data[round][qubit] = {

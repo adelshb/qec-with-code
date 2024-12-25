@@ -192,5 +192,5 @@ class BaseCode(ABC):
                 self.measurement.get_register_id(qubit=qubit, round=round)
                 - self.measurement.register_count
             )
-        except KeyError:
+        except TypeError:
             return None
