@@ -22,17 +22,20 @@ class TestRepetitionCode:
     @pytest.fixture(autouse=True)
     def init(self) -> None:
         self.code = RepetitionCode(
-            distance = 5,
-            depolarize1_rate = 0.01,
-            depolarize2_rate = 0
-            )
+            distance=5, depolarize1_rate=0.01, depolarize2_rate=0
+        )
 
     def test_init(self):
         assert isinstance(self.code, RepetitionCode)
         assert self.code.distance == 5
         assert self.code.depolarize1_rate == 0.01
         assert self.code.depolarize2_rate == 0
-        
+
     def test_build_memory_circuit(self):
         self.code.build_memory_circuit(number_of_rounds=2)
         assert type(self.code.memory_circuit) == Circuit
+
+    def test_sampling(self):
+        self.code.build_memory_circuit(number_of_rounds=2)
+        num_shots = 1
+        assert type(self.code.compute_logical_errors(num_shots=num_shots)) == int

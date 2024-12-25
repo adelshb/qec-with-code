@@ -50,7 +50,6 @@ class TwoDLattice(BaseCode):
         r"""
         Build the 2D lattice.
         """
-        pass
 
     def build_memory_circuit(self, number_of_rounds: int = 2) -> Circuit:
         r"""
@@ -58,4 +57,3 @@ class TwoDLattice(BaseCode):
 
         :param number_of_rounds: The number of rounds in the memory.
         """
-        pass

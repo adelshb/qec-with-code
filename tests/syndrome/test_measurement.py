@@ -29,4 +29,12 @@ class TestMeasurement:
     def test_add_and_get_measurement(self):
         self.measurement.add_outcome(outcome="0", qubit=0, round=1, type="check")
         assert self.measurement.get_outcome(qubit=0, round=1) == "0"
+        assert self.measurement.get_outcome(qubit=1, round=1) == None
         assert self.measurement.register_count == 1
+        self.measurement.add_outcome(outcome="0", qubit=0, round=2, type="cheeeeeeck")
+        self.measurement.add_outcome(outcome="0", qubit=1, round=1, type="check")
+
+    def test_get_register(self):
+        self.measurement.add_outcome(outcome="0", qubit=0, round=1, type="check")
+        assert self.measurement.get_register_id(qubit=0, round=1) == 0
+        assert self.measurement.get_register_id(qubit=1, round=1) == None

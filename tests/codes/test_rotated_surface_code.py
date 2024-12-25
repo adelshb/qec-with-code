@@ -12,7 +12,9 @@
 
 import pytest
 
-from qec import RotatedSurfaceCode
+import stim
+
+from qec import RotatedSurfaceCode, Measurement
 
 
 class TestRotatedSurfaceCode:
@@ -20,11 +22,55 @@ class TestRotatedSurfaceCode:
     @pytest.fixture(autouse=True)
     def init(self) -> None:
         self.code = RotatedSurfaceCode(
-            distance = 3,
-            depolarize1_rate = 0.01,
-            depolarize2_rate = 0
-            )
+            distance=3, depolarize1_rate=0.01, depolarize2_rate=0
+        )
 
     def test_build_lattice(self):
-        assert self.code.lattice == {(1, 1): 0, (2, 1): 1, (3, 1): 2, (1, 2): 3, (2, 2): 4, (3, 2): 5, (1, 3): 6, (2, 3): 7, (3, 3): 8, (2.5, 0.5): 9, (1.5, 1.5): 10, (2.5, 2.5): 11, (1.5, 3.5): 12, (0.5, 1.5): 13, (2.5, 1.5): 14, (1.5, 2.5): 15, (3.5, 2.5): 16}
+        assert self.code.lattice == {
+            (1, 1): 0,
+            (2, 1): 1,
+            (3, 1): 2,
+            (1, 2): 3,
+            (2, 2): 4,
+            (3, 2): 5,
+            (1, 3): 6,
+            (2, 3): 7,
+            (3, 3): 8,
+            (2.5, 0.5): 9,
+            (1.5, 1.5): 10,
+            (2.5, 2.5): 11,
+            (1.5, 3.5): 12,
+            (0.5, 1.5): 13,
+            (2.5, 1.5): 14,
+            (1.5, 2.5): 15,
+            (3.5, 2.5): 16,
+        }
         assert self.code.data_qubits == [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        assert self.code.check_qubits == [9, 10, 11, 12, 13, 14, 15, 16]
+
+        assert self.code.x_qubits == {
+            9: [(2.0, 1.0), (3.0, 1.0), (2.0, 0.0), (3.0, 0.0)],
+            10: [(1.0, 2.0), (2.0, 2.0), (1.0, 1.0), (2.0, 1.0)],
+            11: [(2.0, 3.0), (3.0, 3.0), (2.0, 2.0), (3.0, 2.0)],
+            12: [(1.0, 4.0), (2.0, 4.0), (1.0, 3.0), (2.0, 3.0)],
+        }
+
+        assert self.code.z_qubits == {
+            13: [(0.0, 2.0), (0.0, 1.0), (1.0, 2.0), (1.0, 1.0)],
+            14: [(2.0, 2.0), (2.0, 1.0), (3.0, 2.0), (3.0, 1.0)],
+            15: [(1.0, 3.0), (1.0, 2.0), (2.0, 3.0), (2.0, 2.0)],
+            16: [(3.0, 3.0), (3.0, 2.0), (4.0, 3.0), (4.0, 2.0)],
+        }
+
+    def test_build_memory(self):
+        self.code.build_memory_circuit(number_of_rounds=2)
+        assert type(self.code.memory_circuit) == stim.Circuit
+
+    def test_measurement(self):
+        assert isinstance(self.code.measurement, Measurement)
+        assert isinstance(self.code.register_count, int)
+        assert self.code.get_outcome(qubit=0, round=0) == None
+        self.code.add_outcome(outcome="0", qubit=0, round=0, type="check")
+        assert isinstance(self.code.get_target_rec(qubit=0, round=0), int)
+        print(self.code.get_target_rec(qubit=1000, round=0))
+        assert self.code.get_target_rec(qubit=1000, round=0) == None
