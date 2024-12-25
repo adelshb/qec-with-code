@@ -46,6 +46,25 @@ class TestRotatedSurfaceCode:
             (3.5, 2.5): 16,
         }
         assert self.code.data_qubits == [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        assert self.code.check_qubits == [9, 10, 11, 12, 13, 14, 15, 16]
+
+        assert self.code.x_qubits == {
+            9: [(2.0, 1.0), (3.0, 1.0), (2.0, 0.0), (3.0, 0.0)],
+            10: [(1.0, 2.0), (2.0, 2.0), (1.0, 1.0), (2.0, 1.0)],
+            11: [(2.0, 3.0), (3.0, 3.0), (2.0, 2.0), (3.0, 2.0)],
+            12: [(1.0, 4.0), (2.0, 4.0), (1.0, 3.0), (2.0, 3.0)],
+        }
+
+        assert self.code.z_qubits == {
+            13: [(0.0, 2.0), (0.0, 1.0), (1.0, 2.0), (1.0, 1.0)],
+            14: [(2.0, 2.0), (2.0, 1.0), (3.0, 2.0), (3.0, 1.0)],
+            15: [(1.0, 3.0), (1.0, 2.0), (2.0, 3.0), (2.0, 2.0)],
+            16: [(3.0, 3.0), (3.0, 2.0), (4.0, 3.0), (4.0, 2.0)],
+        }
+
+    def test_build_memory(self):
+        self.code.build_memory_circuit(number_of_rounds=2)
+        assert type(self.code.memory_circuit) == stim.Circuit
 
     def test_measurement(self):
         assert isinstance(self.code.measurement, Measurement)
