@@ -24,7 +24,7 @@ class RotatedSurfaceCode(TwoDLattice):
     A class for the Rotated Surface code.
     """
 
-    __slots__ = ("_data_qubits", "_x_qubits", "_z_qubits")
+    __slots__ = ("_data_qubits", "_x_qubits", "_z_qubits", "_check_qubits")
 
     def __init__(
         self,
@@ -44,6 +44,13 @@ class RotatedSurfaceCode(TwoDLattice):
         The data qubits.
         """
         return self._data_qubits
+
+    @property
+    def check_qubits(self) -> list:
+        r"""
+        The check qubits.
+        """
+        return self._check_qubits
 
     @property
     def x_qubits(self) -> dict:
@@ -69,150 +76,103 @@ class RotatedSurfaceCode(TwoDLattice):
         # Initialization
         self._memory_circuit = Circuit()
 
-        for q in self.data_qubits:
-            self._memory_circuit.append("R", [q])
-            self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
+        self._memory_circuit.append("R", [q for q in self.lattice.values()])
+        self._memory_circuit.append(
+            "DEPOLARIZE1", [q for q in self.lattice.values()], self.depolarize1_rate
+        )
+
+        self.append_stab_circuit(round=0)
+
+        for i in range(len(self.z_qubits.keys())):
+            self._memory_circuit.append("DETECTOR", [target_rec(-1 - i)])
 
         # Body rounds
-        for round in range(number_of_rounds):
+        for round in range(1, number_of_rounds):
 
-            # Refresh X and qubits
-            for q in self.x_qubits.keys():
-                self._memory_circuit.append("R", [q])
-                self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
-                self._memory_circuit.append("H", [q])
-                self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
+            self.append_stab_circuit(round=round)
 
-            for q in self.z_qubits.keys():
-                self._memory_circuit.append("R", [q])
-                self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
-
-            # Perform CNOTs with specific order to avoid hook errors (error propagation)
-            for i in range(4):
-                for q in self.z_qubits.keys():
-                    try:
-                        control = self.lattice[self.z_qubits[q][i]]
-                        self._memory_circuit.append("CNOT", [control, q])
-                        self._memory_circuit.append(
-                            "DEPOLARIZE2", [control, q], self.depolarize2_rate
-                        )
-                    except KeyError:
-                        pass
-
-                for q in self.x_qubits:
-                    try:
-                        target = self.lattice[self.x_qubits[q][i]]
-                        self._memory_circuit.append("CNOT", [q, target])
-                        self._memory_circuit.append(
-                            "DEPOLARIZE2", [target, q], self.depolarize2_rate
-                        )
-                    except KeyError:
-                        pass
-
-            # Undo the Hadamard for the X measurement
-            for q in self.x_qubits.keys():
-                self._memory_circuit.append("H", [q])
-                self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
-
-            # Perform measurements
-            for q in list(self.x_qubits.keys()) + list(self.z_qubits.keys()):
-                self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
-                self._memory_circuit.append("M", [q])
-                self.add_outcome(
-                    outcome=target_rec(-1), qubit=q, round=round, type="check"
+            for i in range(len(self.check_qubits)):
+                self._memory_circuit.append(
+                    "DETECTOR",
+                    [target_rec(-1 - i), target_rec(-1 - i - len(self.check_qubits))],
                 )
 
-                # Adding detector
-                if round == 0:
-                    self._memory_circuit.append(
-                        "DETECTOR", [self.get_outcome(qubit=q, round=round)]
-                    )
-                else:
-                    self._memory_circuit.append(
-                        "DETECTOR",
-                        [
-                            self.get_outcome(qubit=q, round=round),
-                            self.get_outcome(qubit=q, round=round - 1),
-                        ],
-                    )
+        # Finalization
 
-        # Finalize
-        for q in self.data_qubits:
-            self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
-            self._memory_circuit.append("M", [q])
-            self.add_outcome(outcome=target_rec(-1), qubit=q, round=round, type="data")
-        count = self.measurement.register_count
-
-        # Adding detector
-        for qx in self.x_qubits.keys():
-            adjacent_data_qubits = [
-                self.lattice[i] for i in self.x_qubits[qx] if i in self.lattice.keys()
-            ]
-            # Get their last measurement register_id
-            recs = [
-                target_rec(
-                    self.measurement.get_register_id(
-                        qubit=qd, round=number_of_rounds - 1
-                    )
-                    - count
-                )
-                for qd in adjacent_data_qubits
-            ]
-            recs += [
-                target_rec(
-                    self.measurement.get_register_id(
-                        qubit=qx, round=number_of_rounds - 1
-                    )
-                    - count
-                )
-            ]
-            self._memory_circuit.append("DETECTOR", recs)
-
-            recs += [
-                target_rec(
-                    self.measurement.get_register_id(
-                        qubit=qx, round=number_of_rounds - 1
-                    )
-                    - count
-                )
-            ]
-            self._memory_circuit.append("DETECTOR", recs)
+        self._memory_circuit.append(
+            "DEPOLARIZE1", [q for q in self.data_qubits], self.depolarize1_rate
+        )
+        self._memory_circuit.append("MR", [q for q in self.data_qubits])
+        for i, q in enumerate(self.data_qubits):
+            self.add_outcome(
+                outcome=target_rec(-1 - i), qubit=q, round=number_of_rounds, type="data"
+            )
 
         for qz in self.z_qubits.keys():
 
-            # Get the qubit index
-            adjacent_data_qubits = [
+            qz_adjacent_data_qubits = [
                 self.lattice[i] for i in self.z_qubits[qz] if i in self.lattice.keys()
             ]
 
-            # Get their last measurement register_id
             recs = [
-                target_rec(
-                    self.measurement.get_register_id(
-                        qubit=qd, round=number_of_rounds - 1
-                    )
-                    - count
-                )
-                for qd in adjacent_data_qubits
+                self.get_target_rec(qubit=qd, round=number_of_rounds)
+                for qd in qz_adjacent_data_qubits
             ]
-            recs += [
-                target_rec(
-                    self.measurement.get_register_id(
-                        qubit=qz, round=number_of_rounds - 1
-                    )
-                    - count
-                )
-            ]
-            self._memory_circuit.append("DETECTOR", recs)
+            recs += [self.get_target_rec(qubit=qz, round=number_of_rounds - 1)]
+            self._memory_circuit.append("DETECTOR", [target_rec(r) for r in recs])
 
         # Adding the comparison with the expected state
-        count = self.measurement.register_count
-        for q in self._data_qubits:
-            rec_target = self.measurement.get_register_id(
-                qubit=q, round=number_of_rounds - 1
-            )
-            self._memory_circuit.append_from_stim_program_text(
-                f"OBSERVABLE_INCLUDE(0) rec[{rec_target - count}]"
+        ql = [self.lattice[(i + 1, i + 1)] for i in range(self.distance)]
+        recs = [self.get_target_rec(qubit=q, round=number_of_rounds) for q in ql]
+        recs_str = " ".join(f"rec[{rec}]" for rec in recs)
+        self._memory_circuit.append_from_stim_program_text(
+            f"OBSERVABLE_INCLUDE(0) {recs_str}"
+        )
+
+    def append_stab_circuit(self, round: int) -> None:
+        r"""
+        Append the stabilizer circuit.
+        """
+
+        self._memory_circuit.append("H", [q for q in self.x_qubits.keys()])
+        self._memory_circuit.append(
+            "DEPOLARIZE1", [q for q in self.x_qubits.keys()], self.depolarize1_rate
+        )
+
+        # Perform CNOTs with specific order to avoid hook errors
+        for i in range(4):
+            for q in self.z_qubits.keys():
+                try:
+                    control = self.lattice[self.z_qubits[q][i]]
+                    self._memory_circuit.append("CNOT", [control, q])
+                    self._memory_circuit.append(
+                        "DEPOLARIZE2", [control, q], self.depolarize2_rate
+                    )
+                except KeyError:
+                    pass
+
+            for q in self.x_qubits:
+                try:
+                    target = self.lattice[self.x_qubits[q][i]]
+                    self._memory_circuit.append("CNOT", [q, target])
+                    self._memory_circuit.append(
+                        "DEPOLARIZE2", [target, q], self.depolarize2_rate
+                    )
+                except KeyError:
+                    pass
+
+        self._memory_circuit.append("H", [q for q in self.x_qubits.keys()])
+        self._memory_circuit.append(
+            "DEPOLARIZE1", [q in self.x_qubits.keys()], self.depolarize1_rate
+        )
+
+        self._memory_circuit.append(
+            "DEPOLARIZE1", [q in self.check_qubits], self.depolarize1_rate
+        )
+        self._memory_circuit.append("MR", [q for q in self.check_qubits])
+        for i, q in enumerate(self.check_qubits):
+            self.add_outcome(
+                outcome=target_rec(-1 - i), qubit=q, round=round, type="check"
             )
 
     def build_lattice(self) -> None:
@@ -250,17 +210,23 @@ class RotatedSurfaceCode(TwoDLattice):
         self._number_of_qubits = len(self.lattice)
 
         self._data_qubits = [self._lattice[coord] for coord in data_qubits_coords]
+        self._check_qubits = [
+            q for q in self._lattice.values() if q not in self.data_qubits
+        ]
 
-        index_reorder = [0, 2, 1, 3]
+        index_reorder_x = [1, 3, 0, 2]
         self._x_qubits = {
             self._lattice[coord]: [
-                self.get_adjacent_coords(coord)[i] for i in index_reorder
+                self.get_adjacent_coords(coord)[i] for i in index_reorder_x
             ]
             for coord in x_qubits_coords
         }
 
+        index_reorder_z = [1, 0, 3, 2]
         self._z_qubits = {
-            self._lattice[coord]: self.get_adjacent_coords(coord)
+            self._lattice[coord]: [
+                self.get_adjacent_coords(coord)[i] for i in index_reorder_z
+            ]
             for coord in z_qubits_coords
         }
 

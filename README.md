@@ -16,7 +16,7 @@ This project is designed to provide:
 ## List of Implemented QEC Codes
 
 - **[Repetition code](notebooks/repetition_code.ipynb)**: A simple example of a 1D repetition code implemented for error correction.
-- **[Rotated surface code](notebooks/rotated_surface_code.ipynb)** (TBA): An implementation of the 2D surface code, one of the most well-known error correction codes in quantum computing.
+- **[Rotated surface code](notebooks/rotated_surface_code.ipynb)**: An implementation of the 2D surface code, one of the most well-known error correction codes in quantum computing.
 
 
 ## Installation

@@ -179,3 +179,18 @@ class BaseCode(ABC):
         self._measurement.add_outcome(
             outcome=outcome, qubit=qubit, round=round, type=type
         )
+
+    def get_target_rec(self, qubit: any, round: int) -> int | None:
+        r"""
+        Return the rec of a specific measurement.
+
+        :param qubit: The qubit on which the measurement is performed.
+        :param round: The round during which the measurement is performed.
+        """
+        try:
+            return (
+                self.measurement.get_register_id(qubit=qubit, round=round)
+                - self.measurement.register_count
+            )
+        except KeyError:
+            return None
