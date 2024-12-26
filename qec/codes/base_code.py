@@ -14,6 +14,10 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import matplotlib.cm as cm
+import networkx as nx
 from stim import Circuit
 import pymatching
 
@@ -35,6 +39,7 @@ class BaseCode(ABC):
         "_sampler",
         "_number_of_qubits",
         "_measurement",
+        "_graph",
     )
 
     def __init__(
@@ -57,6 +62,9 @@ class BaseCode(ABC):
         self._memory_circuit: Circuit
         self._number_of_qubits: int
         self._measurement = Measurement()
+
+        self._graph = nx.Graph()
+        self.build_graph()
 
     @property
     def number_of_qubits(self) -> int:
@@ -113,6 +121,19 @@ class BaseCode(ABC):
         The number of outcome collected.
         """
         return self.measurement.register_count
+
+    @property
+    def graph(self) -> int:
+        r"""
+        The graph representing qubits network
+        """
+        return self._graph
+
+    @abstractmethod
+    def build_graph(self) -> None:
+        r"""
+        Build the graph representing the qubit network.
+        """
 
     @abstractmethod
     def build_memory_circuit(self, number_of_rounds: int) -> None:
@@ -194,3 +215,51 @@ class BaseCode(ABC):
             )
         except TypeError:
             return None
+
+    def draw_graph(self) -> None:
+        r"""
+        Draw the graph.
+        """
+
+        # Extract qubit type for coloring
+        node_categories = nx.get_node_attributes(self.graph, "type")
+
+        # Get the unique type and map them to a colormap
+        unique_categories = sorted(
+            set(node_categories.values())
+        )  # Get unique categories
+        num_categories = len(unique_categories)
+        colors = cm.get_cmap("Set1", num_categories)
+
+        # Map node colors based on their category
+        node_colors = [
+            colors(unique_categories.index(node_categories[node]))
+            for node in self.graph.nodes()
+        ]
+
+        # Draw the graph
+        plt.figure(figsize=(8, 6))
+        pos = nx.spring_layout(self.graph)
+
+        # Draw the graph with node numbers and colors
+        nx.draw(
+            self.graph,
+            pos,
+            with_labels=True,
+            node_size=700,
+            node_color=node_colors,
+            font_size=10,
+            font_weight="bold",
+            edge_color="gray",
+        )
+
+        # Create and Display a custom legend patches for each unique type
+        category_legend = [
+            mpatches.Patch(color=colors(i), label=f"{unique_categories[i]} qubit")
+            for i in range(num_categories)
+        ]
+        plt.legend(handles=category_legend, loc="upper right", title="")
+
+        # Display the graph
+        plt.title("")
+        plt.show()
