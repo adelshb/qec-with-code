@@ -238,7 +238,7 @@ class BaseCode(ABC):
         ]
 
         # Draw the graph
-        plt.figure(figsize=(8, 6))
+        plt.figure(figsize=(6, 4))
         pos = nx.spring_layout(self.graph)
 
         # Draw the graph with node numbers and colors
@@ -246,11 +246,17 @@ class BaseCode(ABC):
             self.graph,
             pos,
             with_labels=True,
-            node_size=700,
+            node_size=400,
             node_color=node_colors,
-            font_size=10,
+            font_size=8,
             font_weight="bold",
             edge_color="gray",
+        )
+
+        # Add edge weights as labels
+        edge_labels = nx.get_edge_attributes(self.graph, "weight")
+        nx.draw_networkx_edge_labels(
+            self.graph, pos, edge_labels=edge_labels, font_size=8, font_weight="bold"
         )
 
         # Create and Display a custom legend patches for each unique type
@@ -258,7 +264,9 @@ class BaseCode(ABC):
             mpatches.Patch(color=colors(i), label=f"{unique_categories[i]} qubit")
             for i in range(num_categories)
         ]
-        plt.legend(handles=category_legend, loc="upper right", title="")
+        plt.legend(
+            handles=category_legend, loc="upper left", bbox_to_anchor=(1, 1), title=""
+        )
 
         # Display the graph
         plt.title("")
