@@ -37,7 +37,6 @@ class BaseCode(ABC):
         "_depolarize1_rate",
         "_depolarize2_rate",
         "_sampler",
-        "_number_of_qubits",
         "_measurement",
         "_graph",
     )
@@ -60,18 +59,10 @@ class BaseCode(ABC):
         self._depolarize1_rate = depolarize1_rate
         self._depolarize2_rate = depolarize2_rate
         self._memory_circuit: Circuit
-        self._number_of_qubits: int
         self._measurement = Measurement()
 
         self._graph = nx.Graph()
         self.build_graph()
-
-    @property
-    def number_of_qubits(self) -> int:
-        r"""
-        The total number of physical qubits.
-        """
-        return self._number_of_qubits
 
     @property
     def distance(self) -> int:

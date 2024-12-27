@@ -24,8 +24,6 @@ class RepetitionCode(BaseCode):
     A class for Repetition code.
     """
 
-    __slots__ = "_number_of_qubits"
-
     def __init__(
         self,
         *args,
@@ -36,9 +34,7 @@ class RepetitionCode(BaseCode):
         """
         super().__init__(*args, **kwargs)
 
-        self._number_of_qubits = 2 * self.distance - 1
-
-    def build_graph(self):
+    def build_graph(self) -> None:
         r"""
         Build the graph for the repetition code
         """

@@ -14,17 +14,15 @@ from __future__ import annotations
 
 from stim import Circuit, target_rec
 
-from qec.codes.twod_lattice import TwoDLattice
+from qec.codes.base_code import BaseCode
 
 __all__ = ["RotatedSurfaceCode"]
 
 
-class RotatedSurfaceCode(TwoDLattice):
+class RotatedSurfaceCode(BaseCode):
     r"""
     A class for the Rotated Surface code.
     """
-
-    __slots__ = ("_data_qubits", "_x_qubits", "_z_qubits", "_check_qubits")
 
     def __init__(
         self,
@@ -36,35 +34,6 @@ class RotatedSurfaceCode(TwoDLattice):
         """
 
         super().__init__(*args, **kwargs)
-        self.build_lattice()
-
-    @property
-    def data_qubits(self) -> list:
-        r"""
-        The data qubits.
-        """
-        return self._data_qubits
-
-    @property
-    def check_qubits(self) -> list:
-        r"""
-        The check qubits.
-        """
-        return self._check_qubits
-
-    @property
-    def x_qubits(self) -> dict:
-        r"""
-        The qubits for X checks.
-        """
-        return self._x_qubits
-
-    @property
-    def z_qubits(self) -> dict:
-        r"""
-        The qubits for Z checks.
-        """
-        return self._z_qubits
 
     def build_memory_circuit(self, number_of_rounds: int = 2) -> None:
         r"""
@@ -175,71 +144,109 @@ class RotatedSurfaceCode(TwoDLattice):
                 outcome=target_rec(-1 - i), qubit=q, round=round, type="check"
             )
 
-    def build_lattice(self) -> None:
+    def build_graph(self) -> None:
         r"""
-        Compute the coordinates of the data qubits, the z and x measurements.
+        Build the 2D lattice of the rotated surface code.
         """
 
-        # Compute coordinates of the data qubits
+        # Add the nodes for the data qubits
         data_qubits_coords = [
             (col, row)
             for row in range(1, self.distance + 1)
             for col in range(1, self.distance + 1)
         ]
+        data = [
+            (i, {"type": "data", "coords": data_qubits_coords[i]})
+            for i in range(len(data_qubits_coords))
+        ]
+        self._graph.add_nodes_from(data)
 
-        # Compute the coordinates of the X qubits measurements.
+        # Add the nodes the X check qubits.
         x_qubits_coords = [
             (col + (0.5 if row % 2 != 0 else -0.5), row - 0.5)
             for row in range(1, self.distance + 2)
             for col in range(2, self.distance, 2)
         ]
+        x_check = [
+            (i + len(data), {"type": "X-check", "coords": x_qubits_coords[i]})
+            for i in range(len(x_qubits_coords))
+        ]
+        self._graph.add_nodes_from(x_check)
 
-        # Compute the coordinates of the Z qubits measurements.
+        # Add the ordered edges for the X checks
+        x_edges = []
+        for qx in x_check:
+
+            coords = qx[1]["coords"]
+            ordered_neighboors = self.get_neighboor_qubits(
+                coord=coords, index_order=[1, 3, 0, 2]
+            )
+
+            for order, neighboor in enumerate(ordered_neighboors):
+                if neighboor is not None:
+                    x_edges.append((neighboor, qx[0], order + 1))
+        self._graph.add_weighted_edges_from(x_edges)
+
+        # Add the nodes the Z check qubits.
         z_qubits_coords = [
             (col + (0.5 if row % 2 == 0 else -0.5), row + 0.5)
             for row in range(1, self.distance)
             for col in range(1, self.distance + 1, 2)
         ]
-
-        self._lattice = {
-            tuple(c): i
-            for i, c in enumerate(
-                data_qubits_coords + x_qubits_coords + z_qubits_coords
+        z_check = [
+            (
+                i + len(data) + len(x_check),
+                {"type": "Z-check", "coords": z_qubits_coords[i]},
             )
-        }
-        self._number_of_qubits = len(self.lattice)
-
-        self._data_qubits = [self._lattice[coord] for coord in data_qubits_coords]
-        self._check_qubits = [
-            q for q in self._lattice.values() if q not in self.data_qubits
+            for i in range(len(z_qubits_coords))
         ]
+        self._graph.add_nodes_from(z_check)
 
-        index_reorder_x = [1, 3, 0, 2]
-        self._x_qubits = {
-            self._lattice[coord]: [
-                self.get_adjacent_coords(coord)[i] for i in index_reorder_x
-            ]
-            for coord in x_qubits_coords
-        }
+        # Add the ordered edges for the Z checks
+        z_edges = []
+        for qz in z_check:
 
-        index_reorder_z = [1, 0, 3, 2]
-        self._z_qubits = {
-            self._lattice[coord]: [
-                self.get_adjacent_coords(coord)[i] for i in index_reorder_z
-            ]
-            for coord in z_qubits_coords
-        }
+            coords = qz[1]["coords"]
+            ordered_neighboors = self.get_neighboor_qubits(
+                coord=coords, index_order=[1, 0, 3, 2]
+            )
 
-    @staticmethod
-    def get_adjacent_coords(coord: tuple[float, float]) -> list[tuple[float, float]]:
+            for order, neighboor in enumerate(ordered_neighboors):
+                if neighboor is not None:
+                    z_edges.append((neighboor, qz[0], order + 1))
+        self._graph.add_weighted_edges_from(z_edges)
+
+    def get_neighboor_qubits(
+        self, coord: tuple[float, float], index_order: list[int] | None = None
+    ) -> list[int]:
         r"""
-        Returns the four diagonal coordinates, ordered as:
+        Returns the four diagonal qubit, ordered as default:
         - top-left,
         - top-right,
         - bottom-left,
         - bottom-right.
 
         :param coords: The coordinates of the vertex we want to have the neighboors.
+        :param index_order: The order in which the neighboors are
         """
         col, row = coord
-        return [(col + dx, row + dy) for dx in [-0.5, 0.5] for dy in [-0.5, 0.5]]
+        neighboors_coords = [
+            (col + dx, row + dy) for dx in [-0.5, 0.5] for dy in [-0.5, 0.5]
+        ]
+
+        neighboors = []
+        for coords in neighboors_coords:
+            try:
+                node = [
+                    node
+                    for node, data in self.graph.nodes(data=True)
+                    if data.get("coords") == coords
+                ][0]
+                neighboors.append(node)
+            except IndexError:
+                neighboors.append(None)
+
+        if index_order is None:
+            return neighboors
+        else:
+            return [neighboors[i] for i in index_order]
