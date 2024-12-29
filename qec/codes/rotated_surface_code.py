@@ -12,8 +12,6 @@
 
 from __future__ import annotations
 
-from stim import Circuit, target_rec
-
 from qec.codes.base_code import BaseCode
 
 __all__ = ["RotatedSurfaceCode"]
@@ -33,156 +31,11 @@ class RotatedSurfaceCode(BaseCode):
         Initialize the Rotated Surface Code instance.
         """
 
+        self._checks = ["Z-check", "X-check"]
+
         super().__init__(*args, **kwargs)
 
-    def build_memory_circuit(self, number_of_rounds: int = 2) -> None:
-        r"""
-        Build and return a Stim Circuit object implementing a memory for the given time.
-
-        :param number_of_rounds: The number of rounds in the memory.
-        """
-
-        all_qubits = [q for q in self.graph.nodes()]
-        data_qubits = [
-            node
-            for node, data in self.graph.nodes(data=True)
-            if data.get("type") == "data"
-        ]
-        x_qubits = [
-            node
-            for node, data in self.graph.nodes(data=True)
-            if data.get("type") == "X-check"
-        ]
-        z_qubits = [
-            node
-            for node, data in self.graph.nodes(data=True)
-            if data.get("type") == "Z-check"
-        ]
-
-        # Initialization
-        self._memory_circuit = Circuit()
-
-        self._memory_circuit.append("R", all_qubits)
-        self._memory_circuit.append("DEPOLARIZE1", all_qubits, self.depolarize1_rate)
-
-        self.append_stab_circuit(
-            round=0, data_qubits=data_qubits, x_qubits=x_qubits, z_qubits=z_qubits
-        )
-
-        for i in range(len(z_qubits)):
-            self._memory_circuit.append("DETECTOR", [target_rec(-1 - i)])
-
-        # Body rounds
-        for round in range(1, number_of_rounds):
-
-            self.append_stab_circuit(
-                round=round,
-                data_qubits=data_qubits,
-                x_qubits=x_qubits,
-                z_qubits=z_qubits,
-            )
-
-            for i in range(len(x_qubits + z_qubits)):
-                self._memory_circuit.append(
-                    "DETECTOR",
-                    [target_rec(-1 - i), target_rec(-1 - i - len(x_qubits + z_qubits))],
-                )
-
-        # Finalization
-        self._memory_circuit.append("DEPOLARIZE1", data_qubits, self.depolarize1_rate)
-        self._memory_circuit.append("M", data_qubits)
-
-        for i, q in enumerate(data_qubits):
-            self.add_outcome(
-                outcome=target_rec(-1 - i), qubit=q, round=number_of_rounds, type="data"
-            )
-
-        for qz in z_qubits:
-
-            qz_adjacent_data_qubits = self.graph.neighbors(qz)
-
-            recs = [
-                self.get_target_rec(qubit=qd, round=number_of_rounds)
-                for qd in qz_adjacent_data_qubits
-            ]
-            recs += [self.get_target_rec(qubit=qz, round=number_of_rounds - 1)]
-
-            self._memory_circuit.append("DETECTOR", [target_rec(r) for r in recs])
-
-        # Adding the comparison with the expected state
-        ql = [i + i * self.distance for i in range(self.distance)]
-        recs = [self.get_target_rec(qubit=q, round=number_of_rounds) for q in ql]
-        recs_str = " ".join(f"rec[{rec}]" for rec in recs)
-        self._memory_circuit.append_from_stim_program_text(
-            f"OBSERVABLE_INCLUDE(0) {recs_str}"
-        )
-
-    def append_stab_circuit(self, round: int, data_qubits, x_qubits, z_qubits) -> None:
-        r"""
-        Append the stabilizer circuit.
-        """
-
-        if round > 0:
-            self._memory_circuit.append(
-                "DEPOLARIZE1", x_qubits + z_qubits, self.depolarize1_rate
-            )
-
-        self._memory_circuit.append("H", [q for q in x_qubits])
-        self._memory_circuit.append(
-            "DEPOLARIZE1", [q for q in x_qubits], self.depolarize1_rate
-        )
-
-        # A flag to tell us if a data qubit was used this round
-        measured = {qd: False for qd in data_qubits}
-
-        # Perform CNOTs with specific order to avoid hook errors
-        for order in range(1, 5):
-
-            for qz in z_qubits:
-                control = [
-                    neighbor
-                    for neighbor, attrs in self.graph[qz].items()
-                    if attrs.get("weight") == order
-                ]
-                if len(control) == 1:
-                    control = control[0]
-                    self._memory_circuit.append("CNOT", [control, qz])
-                    self._memory_circuit.append(
-                        "DEPOLARIZE2", [control, qz], self.depolarize2_rate
-                    )
-                    measured[control] = True
-
-            for qx in x_qubits:
-                target = [
-                    neighbor
-                    for neighbor, attrs in self.graph[qx].items()
-                    if attrs.get("weight") == order
-                ]
-                if len(target) == 1:
-                    target = target[0]
-                    self._memory_circuit.append("CNOT", [qx, target])
-                    self._memory_circuit.append(
-                        "DEPOLARIZE2", [target, qx], self.depolarize2_rate
-                    )
-                    measured[target] = True
-
-        # Apply depolarization channel to account for the time not being used
-        not_measured = [key for key, value in measured.items() if value is False]
-        self._memory_circuit.append("DEPOLARIZE1", not_measured, self.depolarize1_rate)
-
-        self._memory_circuit.append("H", [q for q in x_qubits])
-        self._memory_circuit.append(
-            "DEPOLARIZE1", [q for q in x_qubits], self.depolarize1_rate
-        )
-
-        self._memory_circuit.append(
-            "DEPOLARIZE1", [q for q in x_qubits + z_qubits], self.depolarize1_rate
-        )
-        self._memory_circuit.append("MR", [q for q in x_qubits + z_qubits])
-        for i, q in enumerate(x_qubits + z_qubits):
-            self.add_outcome(
-                outcome=target_rec(-1 - i), qubit=q, round=round, type="check"
-            )
+        self._logic_check = [i + i * self.distance for i in range(self.distance)]
 
     def build_graph(self) -> None:
         r"""
