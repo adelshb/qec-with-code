@@ -32,7 +32,6 @@ class RepetitionCode(BaseCode):
         """
 
         self._checks = ["Z-check"]
-
         self._logic_check = [0]
 
         super().__init__(*args, **kwargs)
@@ -42,16 +41,15 @@ class RepetitionCode(BaseCode):
         Build the graph for the repetition code
         """
 
-        data = [(i, {"type": "data"}) for i in range(self.distance)]
-        self._graph.add_nodes_from(data)
-
-        check = [
-            (i + self.distance, {"type": "Z-check"}) for i in range(self.distance - 1)
-        ]
-        self._graph.add_nodes_from(check)
-
-        edges = [(i, i + self.distance, 1) for i in range(self.distance - 1)]
-        self._graph.add_weighted_edges_from(edges)
-
-        edges = [(i, i + self.distance - 1, 2) for i in range(1, self.distance)]
-        self._graph.add_weighted_edges_from(edges)
+        self._graph.add_nodes_from(
+            [(i, {"type": "data"}) for i in range(self.distance)]
+        )
+        self._graph.add_nodes_from(
+            [(i + self.distance, {"type": "Z-check"}) for i in range(self.distance - 1)]
+        )
+        self._graph.add_weighted_edges_from(
+            [(i, i + self.distance, 1) for i in range(self.distance - 1)]
+        )
+        self._graph.add_weighted_edges_from(
+            [(i, i + self.distance - 1, 2) for i in range(1, self.distance)]
+        )

@@ -39,7 +39,8 @@ class BaseCode(ABC):
         "_depolarize2_rate",
         "_sampler",
         "_measurement",
-        "_graph" "_checks",
+        "_graph",
+        "_checks",
         "_logic_check",
     )
 
