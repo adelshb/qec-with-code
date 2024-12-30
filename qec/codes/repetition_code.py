@@ -52,7 +52,7 @@ class RepetitionCode(BaseCode):
         for q in range(self.distance):
             self._memory_circuit.append("DEPOLARIZE1", [q], self.depolarize1_rate)
         
-        # Repeted block
+        # Repeated block
         for round in range(number_of_rounds):
             
             # Loop over the ancillary qubits
