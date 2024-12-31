@@ -207,6 +207,7 @@ class BaseCode(ABC):
                 outcome=target_rec(-1 - i), qubit=q, round=number_of_rounds, type="data"
             )
 
+        # Syndrome extraction grouping data qubits
         for qz in check_qubits["Z-check"]:
 
             qz_adjacent_data_qubits = self.graph.neighbors(qz)
@@ -400,7 +401,7 @@ class BaseCode(ABC):
         # Get the unique types
         unique_categories = sorted(set(node_categories.values()))
 
-        # Custom color palette (you can modify this list with any colors you want)
+        # Custom color palette
         custom_colors = {
             "data": "#D3D3D3",  # grey
             "Z-check": "#d62728",  # red
@@ -427,9 +428,7 @@ class BaseCode(ABC):
             pos = nx.spring_layout(self.graph)
 
         # Draw the graph
-        plt.figure(
-            figsize=(6, 6)
-        )  # Adjusting figure size for better grid representation
+        plt.figure(figsize=(6, 6))
 
         # Draw the graph with node numbers and colors
         nx.draw(
@@ -455,10 +454,10 @@ class BaseCode(ABC):
             mpatches.Patch(color=custom_colors[category], label=f"{category} qubit")
             for category in unique_categories
         ]
+
+        # Display the graph
         plt.legend(
             handles=category_legend, loc="upper left", bbox_to_anchor=(1, 1), title=""
         )
-
-        # Display the graph
         plt.title("")
         plt.show()

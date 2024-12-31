@@ -71,13 +71,13 @@ class RotatedSurfaceCode(BaseCode):
         for qx in x_check:
 
             coords = qx[1]["coords"]
-            ordered_neighboors = self.get_neighboor_qubits(
+            ordered_neighbors = self.get_neighbor_qubits(
                 coord=coords, index_order=[1, 3, 0, 2]
             )
 
-            for order, neighboor in enumerate(ordered_neighboors):
-                if neighboor is not None:
-                    x_edges.append((neighboor, qx[0], order + 1))
+            for order, neighbor in enumerate(ordered_neighbors):
+                if neighbor is not None:
+                    x_edges.append((neighbor, qx[0], order + 1))
         self._graph.add_weighted_edges_from(x_edges)
 
         # Add the nodes the Z check qubits.
@@ -100,16 +100,16 @@ class RotatedSurfaceCode(BaseCode):
         for qz in z_check:
 
             coords = qz[1]["coords"]
-            ordered_neighboors = self.get_neighboor_qubits(
+            ordered_neighbors = self.get_neighbor_qubits(
                 coord=coords, index_order=[1, 0, 3, 2]
             )
 
-            for order, neighboor in enumerate(ordered_neighboors):
-                if neighboor is not None:
-                    z_edges.append((neighboor, qz[0], order + 1))
+            for order, neighbor in enumerate(ordered_neighbors):
+                if neighbor is not None:
+                    z_edges.append((neighbor, qz[0], order + 1))
         self._graph.add_weighted_edges_from(z_edges)
 
-    def get_neighboor_qubits(
+    def get_neighbor_qubits(
         self, coord: tuple[float, float], index_order: list[int] | None = None
     ) -> list[int]:
         r"""
@@ -119,27 +119,27 @@ class RotatedSurfaceCode(BaseCode):
         - bottom-left,
         - bottom-right.
 
-        :param coords: The coordinates of the vertex we want to have the neighboors.
-        :param index_order: The order in which the neighboors are
+        :param coords: The coordinates of the vertex we want to have the neighbors.
+        :param index_order: The order in which the neighbors are
         """
         col, row = coord
-        neighboors_coords = [
+        neighbors_coords = [
             (col + dx, row + dy) for dx in [-0.5, 0.5] for dy in [-0.5, 0.5]
         ]
 
-        neighboors = []
-        for coords in neighboors_coords:
+        neighbors = []
+        for coords in neighbors_coords:
             try:
                 node = [
                     node
                     for node, data in self.graph.nodes(data=True)
                     if data.get("coords") == coords
                 ][0]
-                neighboors.append(node)
+                neighbors.append(node)
             except IndexError:
-                neighboors.append(None)
+                neighbors.append(None)
 
         if index_order is None:
-            return neighboors
+            return neighbors
         else:
-            return [neighboors[i] for i in index_order]
+            return [neighbors[i] for i in index_order]
