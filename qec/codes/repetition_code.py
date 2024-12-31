@@ -42,10 +42,13 @@ class RepetitionCode(BaseCode):
         """
 
         self._graph.add_nodes_from(
-            [(i, {"type": "data"}) for i in range(self.distance)]
+            [(i, {"type": "data", "coords": (i, i)}) for i in range(self.distance)]
         )
         self._graph.add_nodes_from(
-            [(i + self.distance, {"type": "Z-check"}) for i in range(self.distance - 1)]
+            [
+                (i + self.distance, {"type": "Z-check", "coords": (i + 0.5, i + 0.5)})
+                for i in range(self.distance - 1)
+            ]
         )
         self._graph.add_weighted_edges_from(
             [(i, i + self.distance, 1) for i in range(self.distance - 1)]

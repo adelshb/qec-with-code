@@ -16,7 +16,6 @@ from abc import ABC, abstractmethod
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-import matplotlib.cm as cm
 import networkx as nx
 from stim import Circuit, target_rec
 import pymatching
@@ -398,22 +397,39 @@ class BaseCode(ABC):
         # Extract qubit type for coloring
         node_categories = nx.get_node_attributes(self.graph, "type")
 
-        # Get the unique type and map them to a colormap
-        unique_categories = sorted(
-            set(node_categories.values())
-        )  # Get unique categories
-        num_categories = len(unique_categories)
-        colors = cm.get_cmap("Set1", num_categories)
+        # Get the unique types
+        unique_categories = sorted(set(node_categories.values()))
 
-        # Map node colors based on their category
+        # Custom color palette (you can modify this list with any colors you want)
+        custom_colors = {
+            "data": "#D3D3D3",  # grey
+            "Z-check": "#d62728",  # red
+            "X-check": "#1f77b4",  # blue
+            "Y-check": "#2ca02c",  # green
+            # Add more colors if you have more types
+        }
+
+        # Ensure that each type has a corresponding color
         node_colors = [
-            colors(unique_categories.index(node_categories[node]))
+            custom_colors.get(
+                node_categories[node], "#808080"
+            )  # default to gray if type is not in custom_colors
             for node in self.graph.nodes()
         ]
 
+        # Define a layout
+        try:
+            pos = {
+                int(node[0]): (node[1]["coords"][0], node[1]["coords"][1])
+                for node in self.graph.nodes(data=True)
+            }
+        except KeyError:
+            pos = nx.spring_layout(self.graph)
+
         # Draw the graph
-        plt.figure(figsize=(6, 4))
-        pos = nx.spring_layout(self.graph)
+        plt.figure(
+            figsize=(6, 6)
+        )  # Adjusting figure size for better grid representation
 
         # Draw the graph with node numbers and colors
         nx.draw(
@@ -425,6 +441,7 @@ class BaseCode(ABC):
             font_size=8,
             font_weight="bold",
             edge_color="gray",
+            width=1,  # Edge width (adjust as needed)
         )
 
         # Add edge weights as labels
@@ -433,10 +450,10 @@ class BaseCode(ABC):
             self.graph, pos, edge_labels=edge_labels, font_size=8, font_weight="bold"
         )
 
-        # Create and Display a custom legend patches for each unique type
+        # Create and display custom legend patches for each unique type
         category_legend = [
-            mpatches.Patch(color=colors(i), label=f"{unique_categories[i]} qubit")
-            for i in range(num_categories)
+            mpatches.Patch(color=custom_colors[category], label=f"{category} qubit")
+            for category in unique_categories
         ]
         plt.legend(
             handles=category_legend, loc="upper left", bbox_to_anchor=(1, 1), title=""
