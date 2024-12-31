@@ -139,7 +139,7 @@ class BaseCode(ABC):
         return self._logic_check
 
     @abstractmethod
-    def build_graph(self, number_of_rounds: int = 2) -> None:
+    def build_graph(self) -> None:
         r"""
         Build the graph representing the qubit network.
         """
