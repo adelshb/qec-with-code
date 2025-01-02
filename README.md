@@ -54,6 +54,8 @@ rep.memory_circuit.diagram()
 ### Running a threshold computation
 
 ```py
+from qec import RepetitionCode, ThresholdLAB
+
 # Initialize the Threshold LAB instance
 th = ThresholdLAB(
     distances= [3, 5, 7, 11],
