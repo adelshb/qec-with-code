@@ -160,8 +160,11 @@ class ThresholdLAB:
                 self.error_rates, self.collected_stats[distance], label=f"d={distance}"
             )
 
-        ax.set_ylim(y_min, y_max)
-        ax.set_xlim(x_min, x_max)
+        if x_min is not None and x_max is not None:
+            ax.set_xlim(x_min, x_max)
+        if y_min is not None and y_max is not None:
+            ax.set_ylim(y_min, y_max)
+
         ax.loglog()
         ax.set_title(f"{self.code_name} Code Error Rates")
         ax.set_xlabel("Phyical Error Rate")
