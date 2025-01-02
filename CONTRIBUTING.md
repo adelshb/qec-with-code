@@ -8,6 +8,12 @@ This package can be installed by cloning the repository and to install in editab
 pip install -e ".[dev]"
 ```
 
+then, run
+
+```console
+pre-commit install
+```
+
 ## How to contribute
 
 ### Find an issue
