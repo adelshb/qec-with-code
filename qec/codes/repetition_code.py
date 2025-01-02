@@ -31,6 +31,7 @@ class RepetitionCode(BaseCode):
         Initialize the Repetition code instance.
         """
 
+        self._name = "Repetition"
         self._checks = ["Z-check"]
         self._logic_check = [0]
 

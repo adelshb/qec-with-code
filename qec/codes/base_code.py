@@ -13,12 +13,10 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import networkx as nx
 from stim import Circuit, target_rec
-import pymatching
 
 from qec.measurement import Measurement
 from qec.stab import X_check, Z_check
@@ -32,11 +30,10 @@ class BaseCode(ABC):
     """
 
     __slots__ = (
-        "_distance",
+        "_name" "_distance",
         "_memory_circuit",
         "_depolarize1_rate",
         "_depolarize2_rate",
-        "_sampler",
         "_measurement",
         "_graph",
         "_checks",
@@ -69,6 +66,13 @@ class BaseCode(ABC):
         self.build_graph()
 
     @property
+    def name(self) -> str:
+        r"""
+        The name of the code.
+        """
+        return self._name
+
+    @property
     def distance(self) -> int:
         r"""
         The distance of the code.
@@ -95,13 +99,6 @@ class BaseCode(ABC):
         The depolarization rate for two-qubit gate.
         """
         return self._depolarize2_rate
-
-    @property
-    def sampler(self) -> any:
-        r"""
-        The sampler from the memory circuit
-        """
-        return self._sampler
 
     @property
     def measurement(self) -> Measurement:
@@ -316,36 +313,6 @@ class BaseCode(ABC):
             ValueError("This check is not implemented.")
         else:
             ValueError("This check is not implemented.")
-
-    def compute_logical_errors(self, num_shots: int) -> int:
-        r"""
-        Sample the memory circuit and return the number of errors.
-
-        :param num_shots: The number of samples.
-        """
-
-        # Sample the memory circuit
-        self._sampler = self.memory_circuit.compile_detector_sampler()
-        detection_events, observable_flips = self.sampler.sample(
-            num_shots, separate_observables=True
-        )
-
-        # Configure the decoder using the memory circuit then run the decoder
-        detector_error_model = self.memory_circuit.detector_error_model(
-            decompose_errors=False
-        )
-
-        matcher = pymatching.Matching.from_detector_error_model(detector_error_model)
-        predictions = matcher.decode_batch(detection_events)
-
-        # Count the number of errors
-        num_errors = 0
-        for shot in range(num_shots):
-            actual_for_shot = observable_flips[shot]
-            predicted_for_shot = predictions[shot]
-            if not np.array_equal(actual_for_shot, predicted_for_shot):
-                num_errors += 1
-        return num_errors
 
     def get_outcome(
         self,
