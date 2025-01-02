@@ -33,7 +33,7 @@ class TestRotatedSurfaceCode:
         assert isinstance(self.code.measurement, Measurement)
         assert isinstance(self.code.register_count, int)
         assert self.code.get_outcome(qubit=0, round=0) == None
+
         self.code.add_outcome(outcome="0", qubit=0, round=0, type="check")
         assert isinstance(self.code.get_target_rec(qubit=0, round=0), int)
-        print(self.code.get_target_rec(qubit=1000, round=0))
         assert self.code.get_target_rec(qubit=1000, round=0) == None

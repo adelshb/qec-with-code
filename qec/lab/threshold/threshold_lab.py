@@ -86,7 +86,8 @@ class ThresholdLAB:
         """
         return self._code_name
 
-    def compute_logical_errors(self, code: BaseCode, num_shots: int) -> int:
+    @staticmethod
+    def compute_logical_errors(code: BaseCode, num_shots: int) -> int:
         r"""
         Sample the memory circuit and return the number of errors.
 
