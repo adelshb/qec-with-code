@@ -32,6 +32,8 @@ rot = RotatedSurfaceCode(distance = 5)
 rot.draw_graph()
 ```
 
+![Rotated Surface Code](assets/plots/rotated_surface_code_distance_5.png)
+
 ### Accessing Stim circuit
 
 ```py
@@ -70,6 +72,8 @@ th.plot_stats(
     y_max = 5e-1
 )
 ```
+
+![Threshold Repetition Code](assets/plots/threshold_repetition_code.png)
 
 ## Contributing
 
