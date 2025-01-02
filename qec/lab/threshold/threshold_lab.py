@@ -76,6 +76,7 @@ class ThresholdLAB:
         r"""
         Sample the memory circuit and return the number of errors.
 
+        :param code: The code to simulate.
         :param num_shots: The number of samples.
         """
 
@@ -103,20 +104,25 @@ class ThresholdLAB:
         return num_errors
 
     def collect_stats(self, num_shots: int) -> None:
-        r""" """
+        r"""Collect sampling statistics over ranges of distance and errors."""
 
+        # Loop over distance range
         for distance in self.distances:
 
             temp_logical_error_rate = []
 
+            # Loop over physical errors
             for prob_error in self.error_rates:
 
+                # Build the circuit for the code
                 code = self.code(
                     distance=distance,
                     depolarize1_rate=prob_error,
                     depolarize2_rate=prob_error,
                 )
                 code.build_memory_circuit(number_of_rounds=distance * 3)
+
+                # Get the logical error rate
                 num_errors_sampled = self.compute_logical_errors(
                     code=code, num_shots=num_shots
                 )
@@ -125,7 +131,7 @@ class ThresholdLAB:
             self._collected_stats[distance] = temp_logical_error_rate
 
     def plot_stats(self) -> None:
-        r""" """
+        r"""Plot the collected data"""
 
         fig, ax = plt.subplots(1, 1)
 
@@ -137,7 +143,7 @@ class ThresholdLAB:
         # ax.set_ylim(1e-3, 5e-1)
         # ax.set_xlim(2e-2, 1e-1)
         ax.loglog()
-        ax.set_title("Repetition Code Error Rates")
+        ax.set_title("Code Error Rates")
         ax.set_xlabel("Phyical Error Rate")
         ax.set_ylabel("Logical Error Rate")
         ax.grid(which="major")
