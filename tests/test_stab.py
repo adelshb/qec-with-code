@@ -11,3 +11,20 @@
 # limitations under the License.
 
 import pytest
+
+from stim import Circuit
+
+from qec import X_check, Z_check
+
+
+class TestStab:
+
+    def test_x_check(self):
+        circ = Circuit()
+        X_check(circ=circ, data_qubit=0, check_qubit=1)
+        assert str(circ) == "CX 1 0"
+
+    def test_z_check(self):
+        circ = Circuit()
+        Z_check(circ=circ, data_qubit=0, check_qubit=1)
+        assert str(circ) == "CX 0 1"
