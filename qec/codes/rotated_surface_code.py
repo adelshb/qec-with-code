@@ -31,6 +31,7 @@ class RotatedSurfaceCode(BaseCode):
         Initialize the Rotated Surface Code instance.
         """
 
+        self._name = "Rotated Surface"
         self._checks = ["Z-check", "X-check"]
 
         super().__init__(*args, **kwargs)

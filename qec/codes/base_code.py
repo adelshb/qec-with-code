@@ -30,7 +30,7 @@ class BaseCode(ABC):
     """
 
     __slots__ = (
-        "_distance",
+        "_name" "_distance",
         "_memory_circuit",
         "_depolarize1_rate",
         "_depolarize2_rate",
@@ -64,6 +64,13 @@ class BaseCode(ABC):
 
         self._graph = nx.Graph()
         self.build_graph()
+
+    @property
+    def name(self) -> str:
+        r"""
+        The name of the code.
+        """
+        return self._name
 
     @property
     def distance(self) -> int:

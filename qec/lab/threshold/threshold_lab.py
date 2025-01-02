@@ -26,7 +26,13 @@ class ThresholdLAB:
     A class for wrapping threshold calculation
     """
 
-    __slots__ = ("_distances", "_error_rates", "_code", "_collected_stats")
+    __slots__ = (
+        "_distances",
+        "_error_rates",
+        "_code",
+        "_collected_stats",
+        "_code_name",
+    )
 
     def __init__(
         self, code: BaseCode, distances: list[int], error_rates: list[float]
@@ -41,6 +47,7 @@ class ThresholdLAB:
 
         self._distances = distances
         self._code = code
+        self._code_name = code().name
         self._error_rates = error_rates
         self._collected_stats = {}
 
@@ -71,6 +78,13 @@ class ThresholdLAB:
         The collected stats during sampling.
         """
         return self._collected_stats
+
+    @property
+    def code_name(self) -> str:
+        r"""
+        The code name.
+        """
+        return self._code_name
 
     def compute_logical_errors(self, code: BaseCode, num_shots: int) -> int:
         r"""
@@ -130,7 +144,13 @@ class ThresholdLAB:
 
             self._collected_stats[distance] = temp_logical_error_rate
 
-    def plot_stats(self) -> None:
+    def plot_stats(
+        self,
+        x_min: float | None = None,
+        x_max: float | None = None,
+        y_min: float | None = None,
+        y_max: float | None = None,
+    ) -> None:
         r"""Plot the collected data"""
 
         fig, ax = plt.subplots(1, 1)
@@ -140,10 +160,10 @@ class ThresholdLAB:
                 self.error_rates, self.collected_stats[distance], label=f"d={distance}"
             )
 
-        # ax.set_ylim(1e-3, 5e-1)
-        # ax.set_xlim(2e-2, 1e-1)
+        ax.set_ylim(y_min, y_max)
+        ax.set_xlim(x_min, x_max)
         ax.loglog()
-        ax.set_title("Code Error Rates")
+        ax.set_title(f"{self.code_name} Code Error Rates")
         ax.set_xlabel("Phyical Error Rate")
         ax.set_ylabel("Logical Error Rate")
         ax.grid(which="major")
