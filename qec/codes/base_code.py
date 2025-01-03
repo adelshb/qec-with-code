@@ -64,6 +64,7 @@ class BaseCode(ABC):
 
         self._graph = nx.Graph()
         self.build_graph()
+        self.get_check_label()
 
     @property
     def name(self) -> str:
@@ -135,6 +136,16 @@ class BaseCode(ABC):
         """
         return self._logic_check
 
+    def get_check_label(self) -> None:
+        r"""
+        Get the check labels.
+        """
+        node_categories = {}
+        for node, data in self.graph.nodes(data=True):
+            if data["type"] == "check":
+                node_categories[node] = f"{data['label']}-check"
+        self._checks = sorted(set(node_categories.values()))
+
     @abstractmethod
     def build_graph(self) -> None:
         r"""
@@ -160,7 +171,7 @@ class BaseCode(ABC):
             check_qubits[check] = [
                 node
                 for node, data in self.graph.nodes(data=True)
-                if data.get("type") == check
+                if f"{data.get("label")}-{data.get("type")}" == check
             ]
 
         temp = [item for item in check_qubits.values()]
@@ -363,7 +374,13 @@ class BaseCode(ABC):
         """
 
         # Extract qubit type for coloring
-        node_categories = nx.get_node_attributes(self.graph, "type")
+        # node_categories = nx.get_node_attributes(self.graph, "type")
+        node_categories = {}
+        for node, data in self.graph.nodes(data=True):
+            if data["label"] is not None:
+                node_categories[node] = f"{data['label']}-{data['type']}"
+            else:
+                node_categories[node] = data["type"]
 
         # Get the unique types
         unique_categories = sorted(set(node_categories.values()))
@@ -371,6 +388,8 @@ class BaseCode(ABC):
         # Custom color palette
         custom_colors = {
             "data": "#D3D3D3",  # grey
+            "L-data": "#FFCC99",  # orange
+            "R-data": "#FFB6C1",  # pink
             "Z-check": "#d62728",  # red
             "X-check": "#1f77b4",  # blue
             "Y-check": "#2ca02c",  # green
